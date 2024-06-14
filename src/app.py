@@ -1,8 +1,18 @@
 import wx
+from main_window import MainWindow
+from constants import *
 
-app = wx.App()
 
-frame = wx.Frame(None, title="Hello World!")
-frame.Show()
 
-app.MainLoop()
+if __name__ == "__main__":
+    app = wx.App()
+
+    frame = MainWindow(
+        None, 
+        size=(WINDOW_WIDTH, WINDOW_HEIGHT), 
+        title=WINDOW_TITLE, 
+        style=wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX)
+    )
+    frame.Show()
+
+    app.MainLoop()
