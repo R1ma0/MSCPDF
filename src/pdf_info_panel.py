@@ -27,9 +27,13 @@ class PdfInfoPanel(wx.Panel):
 		self.__createWidgets()
 
 	def __createWidgets(self):
-		openPdfBtn = wx.Button(self, label="Open PDF")
-		self.Bind(wx.EVT_BUTTON, self.OnOpenPdf, openPdfBtn)
-		self.__mainSizer.Add(openPdfBtn, flag=wx.RIGHT | wx.TOP | wx.BOTTOM, border=15)
+		filePicker = wx.FilePickerCtrl(
+			self, 
+			wildcard="PDF files (*.pdf)|*.pdf",
+			message="Select PDF file"
+		)
+		self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnOpenPdf, filePicker)
+		self.__mainSizer.Add(filePicker, flag=wx.TOP | wx.BOTTOM, border=15)
 
 		for item in self.__infoItems:
 			itemData = self.__infoItems.get(item)
@@ -61,16 +65,7 @@ class PdfInfoPanel(wx.Panel):
 		setData(self, "producer", meta.producer)
 
 	def OnOpenPdf(self, event) -> None:
-		with wx.FileDialog(
-			self, 
-			"Select PDF file", 
-			wildcard="PDF files (*.pdf)|*.pdf",
-			style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
-		) as openFileDialog:
-			if openFileDialog.ShowModal() == wx.ID_CANCEL:
-				return
-
-			self.__reader.path = openFileDialog.GetPath()
-			self.__fillPdfInfoItems()
-			self.SetSizerAndFit(self.__mainSizer)
+		self.__reader.path = event.GetPath()
+		self.__fillPdfInfoItems()
+		self.SetSizerAndFit(self.__mainSizer)
 		
