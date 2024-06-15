@@ -26,7 +26,7 @@ class PdfInfoPanel(wx.Panel):
 		self.__fillPdfInfoItems()
 		self.__createWidgets()
 
-	def __createWidgets(self):
+	def __createWidgets(self) -> None:
 		filePickerLabel = wx.StaticText(self, label="Select PDF file:")
 		self.__mainSizer.Add(filePickerLabel, flag=wx.TOP, border=15)
 
@@ -54,7 +54,7 @@ class PdfInfoPanel(wx.Panel):
 
 		return sizer
 
-	def __fillPdfInfoItems(self):
+	def __fillPdfInfoItems(self) -> None:
 
 		def setData(self, key, value) -> None:
 			self.__infoItems.get(key).data = value if value is not None else "Empty"

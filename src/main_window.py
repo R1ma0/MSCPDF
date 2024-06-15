@@ -26,8 +26,14 @@ class MainWindow(wx.Frame):
     def __createNotebook(self, parent) -> wx.Notebook:
         notebook = wx.Notebook(parent)
 
-        tabInfo = PdfInfoPanel(notebook)
-        notebook.AddPage(tabInfo, "Metadata")
+        tabMetadata = PdfInfoPanel(notebook)
+        notebook.AddPage(tabMetadata, "Metadata")
+
+        tabSplit = wx.Panel(notebook)
+        notebook.AddPage(tabSplit, "Split")
+
+        tabMerge = wx.Panel(notebook)
+        notebook.AddPage(tabMerge, "Merge")
 
         return notebook
 
