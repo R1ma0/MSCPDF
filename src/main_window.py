@@ -27,7 +27,7 @@ class MainWindow(wx.Frame):
         notebook = wx.Notebook(parent)
 
         tabInfo = PdfInfoPanel(notebook)
-        notebook.AddPage(tabInfo, "Information")
+        notebook.AddPage(tabInfo, "Metadata")
 
         return notebook
 

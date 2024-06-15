@@ -21,22 +21,22 @@ class PdfInfoPanel(wx.Panel):
 			"producer": PdfInfoItem(self, "Producer:"),
 		}
 
+		self.__mainSizer = wx.BoxSizer(wx.VERTICAL)
+
 		self.__fillPdfInfoItems()
 		self.__createWidgets()
 
 	def __createWidgets(self):
-		viewSizer = wx.BoxSizer(wx.VERTICAL)
-
 		openPdfBtn = wx.Button(self, label="Open PDF")
 		self.Bind(wx.EVT_BUTTON, self.OnOpenPdf, openPdfBtn)
-		viewSizer.Add(openPdfBtn)
+		self.__mainSizer.Add(openPdfBtn, flag=wx.RIGHT | wx.TOP | wx.BOTTOM, border=15)
 
 		for item in self.__infoItems:
 			itemData = self.__infoItems.get(item)
 			itemSizer = self.__createInfoSizer(itemData)
-			viewSizer.Add(itemSizer)
+			self.__mainSizer.Add(itemSizer)
 		
-		self.SetSizerAndFit(viewSizer)
+		self.SetSizerAndFit(self.__mainSizer)
 
 	def __createInfoSizer(self, item) -> wx.BoxSizer:
 		sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -49,8 +49,7 @@ class PdfInfoPanel(wx.Panel):
 	def __fillPdfInfoItems(self):
 
 		def setData(self, key, value) -> None:
-			if value is not None:
-				self.__infoItems.get(key).data = value
+			self.__infoItems.get(key).data = value if value is not None else "Empty"
 
 		meta = self.__reader.getMetadata()
 
@@ -73,4 +72,5 @@ class PdfInfoPanel(wx.Panel):
 
 			self.__reader.path = openFileDialog.GetPath()
 			self.__fillPdfInfoItems()
+			self.SetSizerAndFit(self.__mainSizer)
 		
