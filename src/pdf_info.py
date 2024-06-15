@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 @dataclass
 class PdfInfo:
-	pages: int
+	pages: str
 	author: str
 	creator: str
 	producer: str
