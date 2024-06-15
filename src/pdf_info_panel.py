@@ -1,7 +1,8 @@
 import wx
-from pdf_info import PdfInfo
 from reader import Reader
+from pdf_info import PdfInfo
 from pdf_info_item import PdfInfoItem
+from pdf_filepicker import PdfFilepicker
 
 
 
@@ -27,17 +28,9 @@ class PdfInfoPanel(wx.Panel):
 		self.__createWidgets()
 
 	def __createWidgets(self) -> None:
-		filePickerLabel = wx.StaticText(self, label="Select PDF file:")
-		self.__mainSizer.Add(filePickerLabel, flag=wx.TOP, border=15)
-
-		filePicker = wx.FilePickerCtrl(
-			self, 
-			wildcard="PDF files (*.pdf)|*.pdf",
-			message="Select PDF file",
-			size=(775, 30)
-		)
-		self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnOpenPdf, filePicker)
-		self.__mainSizer.Add(filePicker, flag=wx.BOTTOM, border=15)
+		pdfPicker = PdfFilepicker(self, orientation=wx.VERTICAL, size=(775, 30))
+		self.__mainSizer.Add(pdfPicker.getSizer(), flag=wx.TOP | wx.BOTTOM, border=15)
+		self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnOpenPdf, pdfPicker.getPdfPicker())
 
 		for item in self.__infoItems:
 			itemData = self.__infoItems.get(item)
@@ -71,5 +64,4 @@ class PdfInfoPanel(wx.Panel):
 	def OnOpenPdf(self, event) -> None:
 		self.__reader.path = event.GetPath()
 		self.__fillPdfInfoItems()
-		self.SetSizerAndFit(self.__mainSizer)
-		
+		self.SetSizerAndFit(self.__mainSizer)		
