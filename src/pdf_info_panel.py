@@ -72,5 +72,4 @@ class PdfInfoPanel(wx.Panel):
 		self.__reader.path = event.GetPath()
 		self.__fillPdfInfoItems()
 		self.SetSizerAndFit(self.__mainSizer)
-		print(self.GetSize())
 		
