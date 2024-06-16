@@ -44,6 +44,10 @@ class PdfInfoItem:
 	def data(self, value) -> None:
 		self.__data = value
 		self.__updateStaticText()
+
+	def show(self, state=True) -> None:
+		self.__labelST.Show(state)
+		self.__dataST.Show(state)
 	
 	def __createStaticText(self) -> None:
 		self.__labelST = wx.StaticText(

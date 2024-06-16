@@ -21,11 +21,18 @@ class PdfInfoPanel(wx.Panel):
 			"creator": PdfInfoItem(self, "Creator:"),
 			"producer": PdfInfoItem(self, "Producer:"),
 		}
+		self.__showPdfInfoItems(False)
 
 		self.__mainSizer = wx.BoxSizer(wx.VERTICAL)
 
 		self.__fillPdfInfoItems()
 		self.__createWidgets()
+
+	def OnOpenPdf(self, event) -> None:
+		self.__reader.path = event.GetPath()
+		self.__fillPdfInfoItems()
+		self.__showPdfInfoItems()
+		self.SetSizerAndFit(self.__mainSizer)		
 
 	def __createWidgets(self) -> None:
 		pdfPicker = CustomFilepicker(
@@ -67,7 +74,7 @@ class PdfInfoPanel(wx.Panel):
 		setData(self, "creator", meta.creator)
 		setData(self, "producer", meta.producer)
 
-	def OnOpenPdf(self, event) -> None:
-		self.__reader.path = event.GetPath()
-		self.__fillPdfInfoItems()
-		self.SetSizerAndFit(self.__mainSizer)		
+	def __showPdfInfoItems(self, state=True) -> None:
+		for item in self.__infoItems:
+			i = self.__infoItems.get(item)
+			i.show(state)
