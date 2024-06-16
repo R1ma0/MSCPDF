@@ -1,5 +1,6 @@
 import wx
 from pdf_info_panel import PdfInfoPanel
+from pdf_split_panel import PdfSplitPanel
 
 
 
@@ -29,7 +30,7 @@ class MainWindow(wx.Frame):
         tabMetadata = PdfInfoPanel(notebook)
         notebook.AddPage(tabMetadata, "Metadata")
 
-        tabSplit = wx.Panel(notebook)
+        tabSplit = PdfSplitPanel(notebook)
         notebook.AddPage(tabSplit, "Split")
 
         tabMerge = wx.Panel(notebook)
