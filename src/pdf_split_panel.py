@@ -1,7 +1,15 @@
 import wx
+import os
+from enum import Enum
 from pypdf import PdfWriter
 from reader import Reader
 from custom_filepicker import CustomFilepicker
+
+
+
+class SplitMode(Enum):
+	SINGLE = 0
+	MULTIPLE = 1
 
 
 
@@ -65,18 +73,12 @@ class PdfSplitPanel(wx.Panel):
 		dialogStyle = wx.OK_DEFAULT | wx.ICON_INFORMATION
 
 		if srcPathNotNone and savePathNotNone and pageRangesNotEmpty:
-			writer = PdfWriter()
+			selectedSplitMode = self.__splitSaveModeRadio.GetSelection()
 
-			for pages in self.__pdfPageRangeList:
-				pageIdx1 = pages[0] - 1
-				pageIdx2 = pages[1] - 1
-
-				pageRange = [pageIdx1] if pageIdx1 == pageIdx2 else [pageIdx1, pageIdx2]
-
-				writer.append(self.__reader.path, pageRange)
-			
-			writer.write(self.__pathToSavePdf)
-			writer.close()
+			if selectedSplitMode == SplitMode.SINGLE.value:
+				self.__writeSinglePdf()
+			if selectedSplitMode == SplitMode.MULTIPLE.value:
+				self.__writeMultiplePdf()
 		else:
 			dialogMessage = "Select paths for reading and writing PDFs"
 			dialogCaption = "PDF Read & Write Warning!"
@@ -103,6 +105,37 @@ class PdfSplitPanel(wx.Panel):
 
 		self.__clearRangesBtn.Disable()
 		self.__removeRangeBtn.Disable()
+
+	def __addRangesToWriter(self, writer, pages) -> None:
+		pageIdx1 = pages[0] - 1
+		pageIdx2 = pages[1] - 1
+
+		pageRange = [pageIdx1] if pageIdx1 == pageIdx2 else [pageIdx1, pageIdx2]
+
+		writer.append(self.__reader.path, pageRange)
+
+	def __writeSinglePdf(self) -> None:
+		writer = PdfWriter()
+
+		for pages in self.__pdfPageRangeList:
+			self.__addRangesToWriter(writer, pages)			
+		
+		writer.write(self.__pathToSavePdf)
+		writer.close()
+
+	def __writeMultiplePdf(self) -> None:
+		for idx, pages in enumerate(self.__pdfPageRangeList):
+			srcPath = os.path.dirname(self.__pathToSavePdf)
+			srcFileName, srcSuffix = os.path.splitext(self.__pathToSavePdf)
+			saveFileName = srcFileName + f"_{idx + 1}" + srcSuffix
+			pathToSave = os.path.join(srcPath, saveFileName)
+
+			writer = PdfWriter()
+
+			self.__addRangesToWriter(writer, pages)
+
+			writer.write(pathToSave)
+			writer.close()
 
 	def __createWidgets(self) -> None:
 		# File pickers
@@ -134,6 +167,9 @@ class PdfSplitPanel(wx.Panel):
 
 		self.__pagesStaticText = wx.StaticText(self, label="Total Pages: 0")
 		controlsSizer.Add(self.__pagesStaticText, flag=wx.LEFT | wx.BOTTOM, border=15)
+
+		self.__splitSaveModeRadio = wx.RadioBox(self, label="Split Mode", choices=["Single File", "Multiple Files"])
+		controlsSizer.Add(self.__splitSaveModeRadio, flag=wx.LEFT | wx.BOTTOM, border=15)
 
 		# Pages spin ctrls
 
