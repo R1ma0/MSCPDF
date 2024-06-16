@@ -13,6 +13,7 @@ class PdfSplitPanel(wx.Panel):
 		self.__parent = parent
 		self.__reader = Reader()
 		self.__pathToSavePdf = None
+		self.__pdfPageRangeList = []
 
 		self.__mainSizer = wx.BoxSizer(wx.VERTICAL)
 		self.__rangesList = wx.ListBox(self)
@@ -35,6 +36,8 @@ class PdfSplitPanel(wx.Panel):
 		else:
 			rangeText = f"Page {minValue}"
 
+		self.__pdfPageRangeList.append([minValue, maxValue])
+
 		lastItemIdx = self.__rangesList.GetCount()
 		self.__rangesList.InsertItems([rangeText], lastItemIdx)
 
@@ -45,18 +48,32 @@ class PdfSplitPanel(wx.Panel):
 			idx = self.__rangesList.GetSelection()
 			self.__rangesList.Delete(idx)
 
+			self.__pdfPageRangeList.pop(idx)
+
 		if self.__rangesList.GetCount() == 0:
 			self.__removeRangeBtn.Disable()
 
 	def OnSavePdf(self, event) -> None:
+		srcPathNotNone = self.__reader.path is not None
+		savePathNotNone = self.__pathToSavePdf is not None
+		pageRangesNotEmpty = len(self.__pdfPageRangeList) != 0
+
 		dialogMessage = "File successfully saved"
 		dialogCaption = "PDF Read & Write Information!"
 		dialogStyle = wx.OK_DEFAULT | wx.ICON_INFORMATION
 
-		if self.__reader.path is not None and self.__pathToSavePdf is not None:
+		if srcPathNotNone and savePathNotNone and pageRangesNotEmpty:
 			writer = PdfWriter()
-			# writer.append(self.__reader.path, [0, 2, 4])
-			# writer.write(self.__pathToSavePdf)
+
+			for pages in self.__pdfPageRangeList:
+				pageIdx1 = pages[0] - 1
+				pageIdx2 = pages[1] - 1
+
+				pageRange = [pageIdx1] if pageIdx1 == pageIdx2 else [pageIdx1, pageIdx2]
+				
+				writer.append(self.__reader.path, pageRange)
+			
+			writer.write(self.__pathToSavePdf)
 			writer.close()
 		else:
 			dialogMessage = "Select paths for reading and writing PDFs"
@@ -156,8 +173,8 @@ class PdfSplitPanel(wx.Panel):
 
 		self.__pagesStaticText.SetLabel(f"Total Pages: {pages}")
 
-		self.__minPageSpinCtrl.SetRange(1, pages-1)
-		self.__maxPageSpinCtrl.SetRange(2, pages)
+		self.__minPageSpinCtrl.SetRange(1, pages)
+		self.__maxPageSpinCtrl.SetRange(1, pages)
 
 		self.__minPageSpinCtrl.SetValue(1)
 		self.__maxPageSpinCtrl.SetValue(2)
