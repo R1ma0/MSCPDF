@@ -42,6 +42,7 @@ class PdfSplitPanel(wx.Panel):
 		self.__rangesList.InsertItems([rangeText], lastItemIdx)
 
 		self.__removeRangeBtn.Enable()
+		self.__clearRangesBtn.Enable()
 
 	def OnRemoveRange(self, event) -> None:
 		if self.__rangesList.GetSelection() != -1:
@@ -52,6 +53,7 @@ class PdfSplitPanel(wx.Panel):
 
 		if self.__rangesList.GetCount() == 0:
 			self.__removeRangeBtn.Disable()
+			self.__clearRangesBtn.Disable()
 
 	def OnSavePdf(self, event) -> None:
 		srcPathNotNone = self.__reader.path is not None
@@ -70,7 +72,7 @@ class PdfSplitPanel(wx.Panel):
 				pageIdx2 = pages[1] - 1
 
 				pageRange = [pageIdx1] if pageIdx1 == pageIdx2 else [pageIdx1, pageIdx2]
-				
+
 				writer.append(self.__reader.path, pageRange)
 			
 			writer.write(self.__pathToSavePdf)
@@ -93,6 +95,14 @@ class PdfSplitPanel(wx.Panel):
 
 	def OnMaxPageSpin(self, event) -> None:
 		pass
+
+	def OnClearRanges(self, event) -> None:
+		for i in range(self.__rangesList.GetCount()):
+			idx = self.__rangesList.GetTopItem()
+			self.__rangesList.Delete(idx)
+
+		self.__clearRangesBtn.Disable()
+		self.__removeRangeBtn.Disable()
 
 	def __createWidgets(self) -> None:
 		# File pickers
@@ -155,6 +165,11 @@ class PdfSplitPanel(wx.Panel):
 		self.__removeRangeBtn.Disable()
 		self.Bind(wx.EVT_BUTTON, self.OnRemoveRange, self.__removeRangeBtn)
 		controlsSizer.Add(self.__removeRangeBtn, flag=wx.ALIGN_RIGHT | wx.BOTTOM, border=15)
+
+		self.__clearRangesBtn = wx.Button(self, label="Clear Ranges", size=(150, 30))
+		self.__clearRangesBtn.Disable()
+		self.Bind(wx.EVT_BUTTON, self.OnClearRanges, self.__clearRangesBtn)
+		controlsSizer.Add(self.__clearRangesBtn, flag=wx.ALIGN_RIGHT | wx.BOTTOM, border=15)
 
 		saveBtn = wx.Button(self, label="Save PDF", size=(150, 30))
 		self.Bind(wx.EVT_BUTTON, self.OnSavePdf, saveBtn)
