@@ -11,6 +11,10 @@ class SplitMode(Enum):
 	SINGLE = 0
 	MULTIPLE = 1
 
+class RangeSpinType(Enum):
+	MIN = 0
+	MAX = 1
+
 
 
 class PdfSplitPanel(wx.Panel):
@@ -20,6 +24,7 @@ class PdfSplitPanel(wx.Panel):
 
 		self.__parent = parent
 		self.__reader = Reader()
+		self.__pdfMeta = None
 		self.__pathToSavePdf = None
 		self.__pdfPageRangeList = []
 
@@ -30,6 +35,7 @@ class PdfSplitPanel(wx.Panel):
 
 	def OnOpenPdfReadPath(self, event) -> None:
 		self.__reader.path = event.GetPath()
+		self.__pdfMeta = self.__reader.getMetadata()
 		self.__setMinMaxRanges()
 
 	def OnOpenPdfWritePath(self, event) -> None:
@@ -93,10 +99,10 @@ class PdfSplitPanel(wx.Panel):
 		msgDialog.ShowModal()
 
 	def OnMinPageSpin(self, event) -> None:
-		pass
+		self.__checkRangeSpinValue(self.__maxPageSpinCtrl, RangeSpinType.MIN)
 
 	def OnMaxPageSpin(self, event) -> None:
-		pass
+		self.__checkRangeSpinValue(self.__minPageSpinCtrl, RangeSpinType.MAX)
 
 	def OnClearRanges(self, event) -> None:
 		for i in range(self.__rangesList.GetCount()):
@@ -105,6 +111,18 @@ class PdfSplitPanel(wx.Panel):
 
 		self.__clearRangesBtn.Disable()
 		self.__removeRangeBtn.Disable()
+
+	def __checkRangeSpinValue(self, spin: wx.SpinCtrl, rangeType: RangeSpinType=RangeSpinType.MAX) -> None:
+		minValue = self.__minPageSpinCtrl.GetValue()
+		maxValue = self.__maxPageSpinCtrl.GetValue()
+
+		newValue = maxValue
+
+		if rangeType == RangeSpinType.MIN:
+			newValue = minValue
+
+		if minValue >= maxValue:
+			spin.SetValue(newValue)
 
 	def __addRangesToWriter(self, writer, pages) -> None:
 		pageIdx1 = pages[0] - 1
@@ -219,8 +237,7 @@ class PdfSplitPanel(wx.Panel):
 		self.SetSizerAndFit(self.__mainSizer)
 
 	def __setMinMaxRanges(self) -> None:
-		meta = self.__reader.getMetadata()
-		pages = int(meta.pages)
+		pages = int(self.__pdfMeta.pages)
 
 		self.__pagesStaticText.SetLabel(f"Total Pages: {pages}")
 
