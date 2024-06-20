@@ -4,19 +4,42 @@ from pdf_info import PdfInfo
 
 
 class Reader:
-
-	def __init__(self, pdfPath=None):
+	"""
+	A class for reading and processing PDF file
+	"""
+	def __init__(self, pdfPath: str = None):
+		"""
+		Parameters
+		----------
+		pdfPath : str (default is None)
+			Path to PDF file
+		"""
 		self.__pdfPath = pdfPath
 
 	@property
 	def path(self) -> str:
+		"""
+		Return the path to PDF file
+		"""
 		return self.__pdfPath
 	
 	@path.setter
-	def path(self, value) -> None:
+	def path(self, value: str) -> None:
+		"""
+		Sets the path to PDF file
+
+		Parameters
+		----------
+		value : str
+			Path to PDF file
+
+		"""
 		self.__pdfPath = value
 
 	def getMetadata(self) -> PdfInfo:
+		"""
+		Returns object of class PdfInfo with PDF metadata
+		"""
 		meta = None
 		reader = None
 

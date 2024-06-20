@@ -2,18 +2,62 @@ import wx
 from reader import Reader
 from pdf_info import PdfInfo
 from pdf_info_item import PdfInfoItem
-from custom_filepicker import CustomFilepicker
+from custom_file_picker import CustomFilePicker
 
 
 
 class PdfInfoPanel(wx.Panel):
+	"""
+	Panel containing PDF metadata
+	"""
 	
-	def __init__(self, parent):
+	def __init__(self, parent: wx.Window):
 		super(PdfInfoPanel, self).__init__(parent)
 
 		self.__parent = parent
 		self.__reader = Reader()
-		self.__infoItems = {
+		self.__infoItems = self.__initInfoItems()
+		
+		self.__showPdfInfoItems(False)
+		self.__fillPdfInfoItems()
+		self.__createWidgets()
+
+	def OnOpenPdf(self, event: wx.Event) -> None:
+		self.__reader.path = event.GetPath()
+
+		self.__fillPdfInfoItems()
+		self.__showPdfInfoItems()
+
+		self.SetSizerAndFit(self.__mainSizer)		
+
+	def __createWidgets(self) -> None:
+		"""
+		Creates interface elements
+		"""
+		self.__mainSizer = wx.BoxSizer(wx.VERTICAL)
+
+		self.__createFilePicker()
+		self.__createInfoItems()
+		
+		self.SetSizerAndFit(self.__mainSizer)
+
+	def __createFilePicker(self) -> None:
+		pdfFP = CustomFilePicker(
+			self, 
+			size=(775, 30), 
+			label="Select PDF file", 
+			msg="Select PDF file", 
+			wildcard="PDF files (*.pdf)|*.pdf"
+		)
+		sizerFlags = wx.TOP | wx.BOTTOM
+		self.__mainSizer.Add(pdfFP.getSizer(), flag=sizerFlags, border=15)
+		self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnOpenPdf, pdfFP.getPicker())
+
+	def __initInfoItems(self) -> dict:
+		"""
+		Filling initial metadata parameters
+		"""
+		return {
 			"pages": PdfInfoItem(self, "Pages:"),
 			"title": PdfInfoItem(self, "Title:"),
 			"author": PdfInfoItem(self, "Author:"),
@@ -21,49 +65,31 @@ class PdfInfoPanel(wx.Panel):
 			"creator": PdfInfoItem(self, "Creator:"),
 			"producer": PdfInfoItem(self, "Producer:"),
 		}
-		self.__showPdfInfoItems(False)
 
-		self.__mainSizer = wx.BoxSizer(wx.VERTICAL)
-
-		self.__fillPdfInfoItems()
-		self.__createWidgets()
-
-	def OnOpenPdf(self, event) -> None:
-		self.__reader.path = event.GetPath()
-		self.__fillPdfInfoItems()
-		self.__showPdfInfoItems()
-		self.SetSizerAndFit(self.__mainSizer)		
-
-	def __createWidgets(self) -> None:
-		pdfPicker = CustomFilepicker(
-			self, 
-			size=(775, 30), 
-			label="Select PDF file", 
-			msg="Select PDF file", 
-			wildcard="PDF files (*.pdf)|*.pdf"
-		)
-		self.__mainSizer.Add(pdfPicker.getSizer(), flag=wx.TOP | wx.BOTTOM, border=15)
-		self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnOpenPdf, pdfPicker.getPicker())
-
+	def __createInfoItems(self) -> None:
+		"""
+		Creates a pair of title and metadata text
+		"""
 		for item in self.__infoItems:
 			itemData = self.__infoItems.get(item)
 			itemSizer = self.__createInfoSizer(itemData)
-			self.__mainSizer.Add(itemSizer)
-		
-		self.SetSizerAndFit(self.__mainSizer)
 
-	def __createInfoSizer(self, item) -> wx.BoxSizer:
+			self.__mainSizer.Add(itemSizer)
+
+	def __createInfoSizer(self, item: PdfInfoItem) -> wx.BoxSizer:
 		sizer = wx.BoxSizer(wx.HORIZONTAL)
 
 		sizer.Add(item.labelStatic, proportion=0)
-		sizer.Add(item.dataStatic, proportion=1)
+		sizer.Add(item.textStatic, proportion=1)
 
 		return sizer
 
 	def __fillPdfInfoItems(self) -> None:
-
-		def setData(self, key, value) -> None:
-			self.__infoItems.get(key).data = value if value is not None else "Empty"
+		"""
+		Display metadata after PDF load
+		"""
+		def setData(self, key: str, value: str) -> None:
+			self.__infoItems.get(key).text = value if value != None else "Empty"
 
 		meta = self.__reader.getMetadata()
 
@@ -74,7 +100,10 @@ class PdfInfoPanel(wx.Panel):
 		setData(self, "creator", meta.creator)
 		setData(self, "producer", meta.producer)
 
-	def __showPdfInfoItems(self, state=True) -> None:
+	def __showPdfInfoItems(self, state: bool = True) -> None:
+		"""
+		Hides or shows metadata items
+		"""
 		for item in self.__infoItems:
 			i = self.__infoItems.get(item)
 			i.show(state)

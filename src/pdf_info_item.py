@@ -4,11 +4,28 @@ from constants import *
 
 
 class PdfInfoItem:
+	"""
+	Creating a title and description for a metadata item from a PDF file
+	"""
 
-	def __init__(self, parent, label="None", data="Empty"):
+	def __init__(
+		self, 
+		parent: wx.Window, 
+		label: str = "None", 
+		text: str = "Empty"
+	):
+		"""
+		Parameters
+		----------
+		parent: wx.Window
+		label: str (default is "None")
+			Metadata item title
+		text: str (default is "None")
+			Metadata item text
+		"""
 		self.__parent = parent
 		self.__label = label
-		self.__data = data
+		self.__text = text
 
 		self.__fontBold = wx.Font(12, wx.DEFAULT, wx.BOLD, wx.NORMAL)
 		self.__fontNormal = wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.NORMAL)
@@ -16,7 +33,8 @@ class PdfInfoItem:
 		self.__staticTextWrapWidth = WINDOW_WIDTH - 125
 
 		self.__labelST = None
-		self.__dataST = None
+		self.__textST = None
+
 		self.__createStaticText()
 
 	@property
@@ -24,30 +42,30 @@ class PdfInfoItem:
 		return self.__labelST
 
 	@property
-	def dataStatic(self) -> wx.StaticText:
-		return self.__dataST
+	def textStatic(self) -> wx.StaticText:
+		return self.__textST
 
 	@property
 	def label(self) -> str:
 		return self.__label
 
 	@label.setter
-	def label(self, value) -> None:
+	def label(self, value: str) -> None:
 		self.__label = value
 		self.__updateStaticText()
 
 	@property
-	def data(self) -> str:
-		return self.__data
+	def text(self) -> str:
+		return self.__text
 
-	@data.setter
-	def data(self, value) -> None:
-		self.__data = value
+	@text.setter
+	def text(self, value: str) -> None:
+		self.__text = value
 		self.__updateStaticText()
 
-	def show(self, state=True) -> None:
+	def show(self, state: bool = True) -> None:
 		self.__labelST.Show(state)
-		self.__dataST.Show(state)
+		self.__textST.Show(state)
 	
 	def __createStaticText(self) -> None:
 		self.__labelST = wx.StaticText(
@@ -56,13 +74,13 @@ class PdfInfoItem:
 		self.__labelST.SetFont(self.__fontBold)
 		self.__labelST.Wrap(self.__staticTextWrapWidth)
 
-		self.__dataST = wx.StaticText(self.__parent, label=self.__data)
-		self.__dataST.SetFont(self.__fontNormal)
-		self.__dataST.Wrap(self.__staticTextWrapWidth)
+		self.__textST = wx.StaticText(self.__parent, label=self.__text)
+		self.__textST.SetFont(self.__fontNormal)
+		self.__textST.Wrap(self.__staticTextWrapWidth)
 
 	def __updateStaticText(self) -> None:
 		self.__labelST.SetLabel(self.__label)
-		self.__dataST.SetLabel(self.__data)
+		self.__textST.SetLabel(self.__text)
 
 		self.__labelST.Wrap(self.__staticTextWrapWidth)
-		self.__dataST.Wrap(self.__staticTextWrapWidth)
+		self.__textST.Wrap(self.__staticTextWrapWidth)

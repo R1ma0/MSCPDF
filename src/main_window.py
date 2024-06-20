@@ -5,7 +5,7 @@ from pdf_split_panel import PdfSplitPanel
 
 
 class MainWindow(wx.Frame):
-
+    
     def __init__(self, *args, **kw):
         super(MainWindow, self).__init__(*args, **kw)
 
@@ -14,17 +14,22 @@ class MainWindow(wx.Frame):
         self.__createMenuBar()
         self.CreateStatusBar()
 
+    def OnExit(self, event: wx.Event) -> None:
+        self.Close(True)
+
     def __createWidgets(self):
+        """
+        Creates interface elements
+        """
         mainPanel = wx.Panel(self)
+        mainSizer = wx.BoxSizer(wx.VERTICAL)
 
         notebook = self.__createNotebook(mainPanel)
-
-        mainSizer = wx.BoxSizer(wx.VERTICAL)
         mainSizer.Add(notebook, proportion=1, flag=wx.EXPAND)
 
         mainPanel.SetSizer(mainSizer)
 
-    def __createNotebook(self, parent) -> wx.Notebook:
+    def __createNotebook(self, parent: wx.Window) -> wx.Notebook:
         notebook = wx.Notebook(parent)
 
         tabMetadata = PdfInfoPanel(notebook)
@@ -41,14 +46,11 @@ class MainWindow(wx.Frame):
     def __createMenuBar(self) -> None:
         fileMenu = wx.Menu()
         fileMenu.AppendSeparator()
+
         exitItem = fileMenu.Append(wx.ID_EXIT, "&Quit\tCtrl-Q", "Close app")
+        self.Bind(wx.EVT_MENU, self.OnExit, exitItem)
 
         menuBar = wx.MenuBar()
         menuBar.Append(fileMenu, "&File")
 
         self.SetMenuBar(menuBar)
-
-        self.Bind(wx.EVT_MENU, self.OnExit, exitItem)
-
-    def OnExit(self, event) -> None:
-        self.Close(True)
