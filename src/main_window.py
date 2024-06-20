@@ -5,14 +5,14 @@ from pdf_split_panel import PdfSplitPanel
 
 
 class MainWindow(wx.Frame):
-    
+
     def __init__(self, *args, **kw):
         super(MainWindow, self).__init__(*args, **kw)
 
+        self.__statusBar = self.CreateStatusBar()
         self.Centre()
         self.__createWidgets()
         self.__createMenuBar()
-        self.CreateStatusBar()
 
     def OnExit(self, event: wx.Event) -> None:
         self.Close(True)
@@ -33,9 +33,11 @@ class MainWindow(wx.Frame):
         notebook = wx.Notebook(parent)
 
         tabMetadata = PdfInfoPanel(notebook)
+        tabMetadata.SetStatusBar(self.__statusBar)
         notebook.AddPage(tabMetadata, "Metadata")
 
         tabSplit = PdfSplitPanel(notebook)
+        tabSplit.SetStatusBar(self.__statusBar)
         notebook.AddPage(tabSplit, "Split")
 
         tabMerge = wx.Panel(notebook)

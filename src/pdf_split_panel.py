@@ -31,30 +31,42 @@ class PdfSplitPanel(wx.Panel):
 		self.__pathToSavePdf = None
 		self.__pdfPageRangeList = []
 		self.__rangesList = wx.ListBox(self)
+		self.__statusBar = None
 
 		self.__createWidgets()
 
 	def OnOpenPdfReadPath(self, event: wx.Event) -> None:
 		self.__reader.path = event.GetPath()
-		self.__pdfMeta = self.__reader.getMetadata()
+		
+		try:
+			self.__pdfMeta = self.__reader.getMetadata()
+		except FileNotFoundError:
+			self.__setStatusText("The file specified for load was not found")
+		else:
+			pages = int(self.__pdfMeta.pages)
+			self.__pagesStaticText.SetLabel(f"Total Pages: {pages}")
 
-		pages = int(self.__pdfMeta.pages)
-		self.__pagesStaticText.SetLabel(f"Total Pages: {pages}")
-
-		self.__setMinMaxRanges()
+			self.__setMinMaxRanges(pages)
+			self.__checkSavingConditions()
 
 	def OnOpenPdfWritePath(self, event: wx.Event) -> None:
 		self.__pathToSavePdf = event.GetPath()
 
+		if not self.__isSaveFileDirExists(event.GetPath()):
+			self.__setStatusText("The folder to be saved is incorrect!")
+
+		self.__checkSavingConditions()
+
 	def OnAddRange(self, event: wx.Event) -> None:
-		# TODO: Disable if src and save paths not set
 		minValue = self.__minPageSpinCtrl.GetValue()
 		maxValue = self.__maxPageSpinCtrl.GetValue()
 
 		if minValue != maxValue:
 			rangeText = f"Pages {minValue} to {maxValue}"
+			self.__setStatusText(f"Added pages {minValue} to {maxValue}")
 		else:
 			rangeText = f"Page {minValue}"
+			self.__setStatusText(f"Added page {minValue}")
 
 		self.__pdfPageRangeList.append([minValue, maxValue])
 
@@ -63,37 +75,40 @@ class PdfSplitPanel(wx.Panel):
 
 		self.__rmRangeBtn.Enable()
 		self.__clrRangesBtn.Enable()
+		self.__checkSavingConditions()
 
 	def OnRemoveRange(self, event: wx.Event) -> None:
 		if self.__rangesList.GetSelection() != -1:
 			idx = self.__rangesList.GetSelection()
+			minVal = self.__pdfPageRangeList[idx][0]
+			maxVal = self.__pdfPageRangeList[idx][1]
+
 			self.__rangesList.Delete(idx)
 			self.__pdfPageRangeList.pop(idx)
+
+			self.__setStatusText(f"Removed range pages {minVal} to {maxVal}")
 
 		if self.__rangesList.GetCount() == 0:
 			self.__rmRangeBtn.Disable()
 			self.__clrRangesBtn.Disable()
 
+		self.__checkSavingConditions()
+
 	def OnSavePdf(self, event: wx.Event) -> None:
-		srcPathNotNone = self.__reader.path is not None
-		savePathNotNone = self.__pathToSavePdf is not None
-		pageRangesNotEmpty = len(self.__pdfPageRangeList) != 0
+		if self.__rangesList.GetCount() == 0:
+			self.__setStatusText("Page ranges are not specified!")
+			return
+
+		selectedSplitMode = self.__splitSaveModeRadio.GetSelection()
+
+		if selectedSplitMode == SplitMode.SINGLE.value:
+			self.__writeSinglePdf()
+		if selectedSplitMode == SplitMode.MULTIPLE.value:
+			self.__writeMultiplePdf()
 
 		dialogMessage = "File successfully saved"
 		dialogCaption = "PDF Read & Write Information!"
 		dialogStyle = wx.OK_DEFAULT | wx.ICON_INFORMATION
-
-		if srcPathNotNone and savePathNotNone and pageRangesNotEmpty:
-			selectedSplitMode = self.__splitSaveModeRadio.GetSelection()
-
-			if selectedSplitMode == SplitMode.SINGLE.value:
-				self.__writeSinglePdf()
-			if selectedSplitMode == SplitMode.MULTIPLE.value:
-				self.__writeMultiplePdf()
-		else:
-			dialogMessage = "Select paths for reading and writing PDFs"
-			dialogCaption = "PDF Read & Write Warning!"
-			dialogStyle = wx.OK_DEFAULT | wx.ICON_WARNING
 
 		msgDialog = wx.MessageDialog(
 			self, 
@@ -116,6 +131,15 @@ class PdfSplitPanel(wx.Panel):
 
 		self.__clrRangesBtn.Disable()
 		self.__rmRangeBtn.Disable()
+		self.__checkSavingConditions()
+		self.__setStatusText("Range list cleared")
+
+	def SetStatusBar(self, bar: wx.StatusBar) -> None:
+		self.__statusBar = bar
+
+	def __setStatusText(self, text: str) -> None:
+		if self.__statusBar is not None:
+			self.__statusBar.SetStatusText(text)
 
 	def __checkRangeSpinValue(
 		self, 
@@ -136,9 +160,7 @@ class PdfSplitPanel(wx.Panel):
 		if minValue >= maxValue:
 			spin.SetValue(newValue)
 
-	def __setMinMaxRanges(self) -> None:
-		pages = int(self.__pdfMeta.pages)
-
+	def __setMinMaxRanges(self, pages: int) -> None:
 		self.__minPageSpinCtrl.SetRange(1, pages)
 		self.__maxPageSpinCtrl.SetRange(1, pages)
 
@@ -289,9 +311,10 @@ class PdfSplitPanel(wx.Panel):
 		size = (150, 30)
 
 		addRangeLabel = "Add Range"
-		addRangeBtn = wx.Button(self, label=addRangeLabel, size=size)
-		self.Bind(wx.EVT_BUTTON, self.OnAddRange, addRangeBtn)
-		sizer.Add(addRangeBtn, flag=flags, border=border)
+		self.__addRangeBtn = wx.Button(self, label=addRangeLabel, size=size)
+		self.__addRangeBtn.Disable()
+		self.Bind(wx.EVT_BUTTON, self.OnAddRange, self.__addRangeBtn)
+		sizer.Add(self.__addRangeBtn, flag=flags, border=border)
 
 		rmRangeBtnLabel = "Remove Range"
 		self.__rmRangeBtn = wx.Button(self, label=rmRangeBtnLabel, size=size)
@@ -306,6 +329,28 @@ class PdfSplitPanel(wx.Panel):
 		sizer.Add(self.__clrRangesBtn, flag=flags, border=border)
 
 		saveLabel = "Save PDF"
-		saveBtn = wx.Button(self, label=saveLabel, size=size)
-		self.Bind(wx.EVT_BUTTON, self.OnSavePdf, saveBtn)
-		sizer.Add(saveBtn, flag=wx.ALIGN_RIGHT)
+		self.__saveBtn = wx.Button(self, label=saveLabel, size=size)
+		self.__saveBtn.Disable()
+		self.Bind(wx.EVT_BUTTON, self.OnSavePdf, self.__saveBtn)
+		sizer.Add(self.__saveBtn, flag=wx.ALIGN_RIGHT)
+
+	def __isSaveFileDirExists(self, savePath: str) -> bool:
+		dirname = os.path.dirname(savePath)
+		return os.path.isdir(dirname)
+
+	def __checkSavingConditions(self) -> None:
+		srcPathNotNone = self.__reader.path is not None
+		savePathNotNone = self.__pathToSavePdf is not None
+
+		if savePathNotNone:
+			isSaveDirExists = self.__isSaveFileDirExists(self.__pathToSavePdf)
+
+		srcPathValid = srcPathNotNone and os.path.exists(self.__reader.path)
+		saveDirValid = savePathNotNone and isSaveDirExists
+
+		if srcPathValid and saveDirValid:
+			self.__saveBtn.Enable()
+			self.__addRangeBtn.Enable()
+		else:
+			self.__saveBtn.Disable()
+			self.__addRangeBtn.Disable()

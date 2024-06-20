@@ -44,8 +44,12 @@ class Reader:
 		reader = None
 
 		if self.__pdfPath is not None:
-			reader = PdfReader(self.__pdfPath)
-			meta = reader.metadata
+			try:
+				reader = PdfReader(self.__pdfPath)
+			except FileNotFoundError:
+				raise
+			else:
+				meta = reader.metadata
 
 		pages = None if reader is None else str(len(reader.pages))
 		author = None if meta is None else meta.author

@@ -17,6 +17,7 @@ class PdfInfoPanel(wx.Panel):
 		self.__parent = parent
 		self.__reader = Reader()
 		self.__infoItems = self.__initInfoItems()
+		self.__statusBar = None
 		
 		self.__showPdfInfoItems(False)
 		self.__fillPdfInfoItems()
@@ -25,10 +26,22 @@ class PdfInfoPanel(wx.Panel):
 	def OnOpenPdf(self, event: wx.Event) -> None:
 		self.__reader.path = event.GetPath()
 
-		self.__fillPdfInfoItems()
-		self.__showPdfInfoItems()
+		try:
+			_ =self.__reader.getMetadata() 
+		except FileNotFoundError:
+			self.__setStatusText("Specified file not found!")
+		else:
+			self.__fillPdfInfoItems()
+			self.__showPdfInfoItems()
 
-		self.SetSizerAndFit(self.__mainSizer)		
+			self.SetSizerAndFit(self.__mainSizer)		
+
+	def SetStatusBar(self, bar: wx.StatusBar) -> None:
+		self.__statusBar = bar
+
+	def __setStatusText(self, text: str) -> None:
+		if self.__statusBar is not None:
+			self.__statusBar.SetStatusText(text)
 
 	def __createWidgets(self) -> None:
 		"""
@@ -91,7 +104,7 @@ class PdfInfoPanel(wx.Panel):
 		def setData(self, key: str, value: str) -> None:
 			self.__infoItems.get(key).text = value if value != None else "Empty"
 
-		meta = self.__reader.getMetadata()
+		meta =self.__reader.getMetadata() 
 
 		setData(self, "pages", meta.pages)
 		setData(self, "title", meta.title)
