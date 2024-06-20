@@ -33,6 +33,7 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 		self.__pathToSavePdf = None
 		self.__pdfPageRangeList = []
 		self.__rangesList = wx.ListBox(self)
+		self.__margin = 15
 
 		self.__createWidgets()
 
@@ -45,7 +46,7 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 			self.SetStatusBarText("The file specified for load was not found!")
 		else:
 			pages = int(self.__pdfMeta.pages)
-			self.__pagesStaticText.SetLabel(f"Total Pages: {pages}")
+			self.__totalPages.SetLabel(f"Total Pages: {pages}")
 
 			self.__setMinMaxRanges(pages)
 			self.__checkSavingConditions()
@@ -100,7 +101,7 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 			self.SetStatusBarText("Page ranges are not specified!")
 			return
 
-		selectedSplitMode = self.__splitSaveModeRadio.GetSelection()
+		selectedSplitMode = self.__spSaveMode.GetSelection()
 
 		if selectedSplitMode == SplitMode.SINGLE.value:
 			self.__writeSinglePdf()
@@ -134,6 +135,12 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 		self.__rmRangeBtn.Disable()
 		self.__checkSavingConditions()
 		self.SetStatusBarText("Range list cleared")
+
+	def OnListItemMoveUp(self, event: wx.Event) -> None:
+		self.SetStatusBarText("Move Up")
+
+	def OnListItemMoveDown(self, event: wx.Event) -> None:
+		self.SetStatusBarText("Move Down")
 
 	def __checkRangeSpinValue(
 		self, 
@@ -202,43 +209,64 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 		"""
 		Creates interface elements
 		"""
-		border = 15
-
 		self.__mainSizer = wx.BoxSizer(wx.VERTICAL)
 		self.__createFilePickers(self.__mainSizer)
+
+		rngListAndBtnsSizer = wx.BoxSizer(wx.VERTICAL)
+		self.__createRngListAndBtns(rngListAndBtnsSizer)
 
 		rangesSizer = wx.BoxSizer(wx.HORIZONTAL)
 		flags = wx.EXPAND | wx.BOTTOM
 		rangesSizer.Add(
-			self.__rangesList, flag=flags, border=border, proportion=1
+			rngListAndBtnsSizer, flag=flags, border=self.__margin, proportion=1
 		)
 
 		controlsSizer = wx.BoxSizer(wx.VERTICAL)
 
 		flags = wx.LEFT | wx.BOTTOM
-		self.__pagesStaticText = wx.StaticText(self, label="Total Pages: 0")
-		controlsSizer.Add(self.__pagesStaticText, flag=flags, border=border)
+		self.__totalPages = wx.StaticText(self, label="Total Pages: 0")
+		controlsSizer.Add(self.__totalPages, flag=flags, border=self.__margin)
 
-		self.__splitSaveModeRadio = wx.RadioBox(
+		self.__spSaveMode = wx.RadioBox(
 			self, label="Split Mode", choices=["Single File", "Multiple Files"]
 		)
-		controlsSizer.Add(self.__splitSaveModeRadio, flag=flags, border=border)
+		controlsSizer.Add(self.__spSaveMode, flag=flags, border=self.__margin)
 
 		self.__createPageRangeCtrls(controlsSizer)
 		self.__createControlButtons(controlsSizer)
 
 		flags = wx.ALIGN_BOTTOM | wx.BOTTOM
-		rangesSizer.Add(controlsSizer, flag=flags, border=border, proportion=1)
+		rangesSizer.Add(
+			controlsSizer, flag=flags, border=self.__margin, proportion=1
+		)
 		self.__mainSizer.Add(rangesSizer, flag=wx.EXPAND, proportion=1)
 
 		self.SetSizerAndFit(self.__mainSizer)
+
+	def __createRngListAndBtns(self, sizer: wx.BoxSizer) -> None:
+		flags = wx.EXPAND | wx.BOTTOM
+		sizer.Add(
+			self.__rangesList, flag=flags, border=self.__margin, proportion=1
+		)
+
+		rngControlBtnsSizer = wx.BoxSizer(wx.HORIZONTAL)
+
+		rngMoveUpBtn = wx.Button(self, label="Move Up", size=(150, 30))
+		self.Bind(wx.EVT_BUTTON, self.OnListItemMoveUp, rngMoveUpBtn)
+		rngControlBtnsSizer.Add(
+			rngMoveUpBtn, flag=wx.RIGHT, border=self.__margin
+		)
+
+		rngMoveDownBtn = wx.Button(self, label="Move Down", size=(150, 30))
+		self.Bind(wx.EVT_BUTTON, self.OnListItemMoveDown, rngMoveDownBtn)
+		rngControlBtnsSizer.Add(rngMoveDownBtn)
+
+		sizer.Add(rngControlBtnsSizer, flag=wx.ALIGN_CENTRE_HORIZONTAL)
 
 	def __createFilePickers(self, sizer: wx.BoxSizer) -> None:
 		"""
 		Creates file pickers for load and save paths
 		"""
-		border = 15
-
 		pdfReadPath = CustomFilePicker(
 			self, 
 			label="Select PDF file to read:", 
@@ -246,7 +274,7 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 			wildcard="PDF files (*.pdf)|*.pdf"
 		)
 		flags = wx.TOP | wx.EXPAND
-		sizer.Add(pdfReadPath.getSizer(), flag=flags, border=border)
+		sizer.Add(pdfReadPath.getSizer(), flag=flags, border=self.__margin)
 		self.Bind(
 			wx.EVT_FILEPICKER_CHANGED, 
 			self.OnOpenPdfReadPath, 
@@ -262,7 +290,7 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 			pickerStyle=style
 		)
 		flags = wx.BOTTOM | wx.EXPAND
-		sizer.Add(pdfWritePath.getSizer(), flag=flags, border=border)
+		sizer.Add(pdfWritePath.getSizer(), flag=flags, border=self.__margin)
 		self.Bind(
 			wx.EVT_FILEPICKER_CHANGED, 
 			self.OnOpenPdfWritePath, 
@@ -280,24 +308,28 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 		pagesRangeSizer = wx.BoxSizer(wx.HORIZONTAL)
 
 		minPagesLabel = wx.StaticText(self, label="Pages")
-		pagesRangeSizer.Add(minPagesLabel, flag=flags, border=border)
+		pagesRangeSizer.Add(minPagesLabel, flag=flags, border=self.__margin)
 
 		self.__minPageSpinCtrl = wx.SpinCtrl(
 			self, min=1, max=2, initial=1, size=size, style=wx.SP_WRAP
 		)
 		self.Bind(wx.EVT_SPINCTRL, self.OnMinPageSpin, self.__minPageSpinCtrl)
-		pagesRangeSizer.Add(self.__minPageSpinCtrl, flag=wx.LEFT, border=border)
+		pagesRangeSizer.Add(
+			self.__minPageSpinCtrl, flag=wx.LEFT, border=self.__margin
+		)
 
 		maxPagesLabel = wx.StaticText(self, label="to")
-		pagesRangeSizer.Add(maxPagesLabel, flag=flags, border=border)
+		pagesRangeSizer.Add(maxPagesLabel, flag=flags, border=self.__margin)
 
 		self.__maxPageSpinCtrl = wx.SpinCtrl(
 			self, min=2, max=2, initial=2, size=size, style=wx.SP_WRAP
 		)
 		self.Bind(wx.EVT_SPINCTRL, self.OnMaxPageSpin, self.__maxPageSpinCtrl)
-		pagesRangeSizer.Add(self.__maxPageSpinCtrl, flag=wx.LEFT, border=border)
+		pagesRangeSizer.Add(
+			self.__maxPageSpinCtrl, flag=wx.LEFT, border=self.__margin
+		)
 
-		sizer.Add(pagesRangeSizer, flag=wx.BOTTOM, border=border)
+		sizer.Add(pagesRangeSizer, flag=wx.BOTTOM, border=self.__margin)
 
 	def __createControlButtons(self, sizer: wx.BoxSizer) -> None:
 		flags = wx.ALIGN_RIGHT | wx.BOTTOM
@@ -308,19 +340,19 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 		self.__addRangeBtn = wx.Button(self, label=addRangeLabel, size=size)
 		self.__addRangeBtn.Disable()
 		self.Bind(wx.EVT_BUTTON, self.OnAddRange, self.__addRangeBtn)
-		sizer.Add(self.__addRangeBtn, flag=flags, border=border)
+		sizer.Add(self.__addRangeBtn, flag=flags, border=self.__margin)
 
 		rmRangeBtnLabel = "Remove Range"
 		self.__rmRangeBtn = wx.Button(self, label=rmRangeBtnLabel, size=size)
 		self.__rmRangeBtn.Disable()
 		self.Bind(wx.EVT_BUTTON, self.OnRemoveRange, self.__rmRangeBtn)
-		sizer.Add(self.__rmRangeBtn, flag=flags, border=border)
+		sizer.Add(self.__rmRangeBtn, flag=flags, border=self.__margin)
 
 		clrRangesLabel = "Clear Ranges"
 		self.__clrRangesBtn = wx.Button(self, label=clrRangesLabel, size=size)
 		self.__clrRangesBtn.Disable()
 		self.Bind(wx.EVT_BUTTON, self.OnClearRanges, self.__clrRangesBtn)
-		sizer.Add(self.__clrRangesBtn, flag=flags, border=border)
+		sizer.Add(self.__clrRangesBtn, flag=flags, border=self.__margin)
 
 		saveLabel = "Save PDF"
 		self.__saveBtn = wx.Button(self, label=saveLabel, size=size)
