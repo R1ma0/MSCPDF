@@ -3,21 +3,22 @@ from reader import Reader
 from pdf_info import PdfInfo
 from pdf_info_item import PdfInfoItem
 from custom_file_picker import CustomFilePicker
+from notebook_panel import NotebookPanel
 
 
 
-class PdfInfoPanel(wx.Panel):
+class PdfInfoPanel(wx.Panel, NotebookPanel):
 	"""
 	Panel containing PDF metadata
 	"""
 	
 	def __init__(self, parent: wx.Window):
 		super(PdfInfoPanel, self).__init__(parent)
+		NotebookPanel.__init__(self)
 
 		self.__parent = parent
 		self.__reader = Reader()
 		self.__infoItems = self.__initInfoItems()
-		self.__statusBar = None
 		
 		self.__showPdfInfoItems(False)
 		self.__fillPdfInfoItems()
@@ -29,19 +30,12 @@ class PdfInfoPanel(wx.Panel):
 		try:
 			_ =self.__reader.getMetadata() 
 		except FileNotFoundError:
-			self.__setStatusText("Specified file not found!")
+			self.SetStatusBarText("Specified file not found!")
 		else:
 			self.__fillPdfInfoItems()
 			self.__showPdfInfoItems()
 
 			self.SetSizerAndFit(self.__mainSizer)		
-
-	def SetStatusBar(self, bar: wx.StatusBar) -> None:
-		self.__statusBar = bar
-
-	def __setStatusText(self, text: str) -> None:
-		if self.__statusBar is not None:
-			self.__statusBar.SetStatusText(text)
 
 	def __createWidgets(self) -> None:
 		"""
