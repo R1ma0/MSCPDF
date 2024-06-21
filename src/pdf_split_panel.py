@@ -5,6 +5,7 @@ from pypdf import PdfWriter
 from reader import Reader
 from custom_file_picker import CustomFilePicker
 from notebook_panel import NotebookPanel
+from utils import *
 
 
 
@@ -15,6 +16,10 @@ class SplitMode(Enum):
 class RangeSpinType(Enum):
 	MIN = 0
 	MAX = 1
+
+class IdxSwapType(Enum):
+	LEFT = 0
+	RIGHT = 1
 
 
 
@@ -80,8 +85,9 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 		self.__checkSavingConditions()
 
 	def OnRemoveRange(self, event: wx.Event) -> None:
-		if self.__rangesList.GetSelection() != -1:
-			idx = self.__rangesList.GetSelection()
+		idx = self.__rangesList.GetSelection()
+
+		if idx != -1:	
 			minVal = self.__pdfPageRangeList[idx][0]
 			maxVal = self.__pdfPageRangeList[idx][1]
 
@@ -137,10 +143,33 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 		self.SetStatusBarText("Range list cleared")
 
 	def OnListItemMoveUp(self, event: wx.Event) -> None:
-		self.SetStatusBarText("Move Up")
+		self.__moveListsItem(IdxSwapType.LEFT)
 
 	def OnListItemMoveDown(self, event: wx.Event) -> None:
-		self.SetStatusBarText("Move Down")
+		self.__moveListsItem(IdxSwapType.RIGHT)
+
+	def __moveListsItem(self, idxType: IdxSwapType) -> None:
+		listIdx = self.__pdfPageRangeList
+		listBox = self.__rangesList
+
+		idxOne = listBox.GetSelection()
+
+		if idxType == IdxSwapType.LEFT:
+			idxTwo = idxOne - 1
+
+			if idxTwo < 0:
+				return
+		elif idxType == IdxSwapType.RIGHT:
+			idxTwo = idxOne + 1
+
+			if idxTwo > listBox.GetCount() - 1:
+				return
+		else:
+			return 
+
+		listIdx, listBox = swapListsItems(listIdx, listBox, idxOne, idxTwo)
+
+		listBox.SetSelection(idxTwo)
 
 	def __checkRangeSpinValue(
 		self, 
