@@ -17,10 +17,10 @@ class PdfInfoItem:
 		"""
 		Parameters
 		----------
-		parent: wx.Window
-		label: str (default is "None")
+		parent : wx.Window
+		label : str (default is "None")
 			Metadata item title
-		text: str (default is "None")
+		text : str (default is "None")
 			Metadata item text
 		"""
 		self.__parent = parent

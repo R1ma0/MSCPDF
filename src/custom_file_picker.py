@@ -20,16 +20,16 @@ class CustomFilePicker:
 		"""
 		Parameters
 		----------
-		parent: wx.Window
+		parent : wx.Window
 		orientation: int (default is wx.VERTICAL)
-		size: wx.Size (default is wx.DefaultSize)
+		size : wx.Size (default is wx.DefaultSize)
 			Size of the picker
-		label: str (default is "")
+		label : str (default is "")
 			Postscript to picker (default is "")
-		msg: str (default is "")
+		msg : str (default is "")
 			File picker window message
-		wildcard: str (default is "")
-		pickerStyle: int (default is wx.FLP_DEFAULT_STYLE)
+		wildcard : str (default is "")
+		pickerStyle : int (default is wx.FLP_DEFAULT_STYLE)
 		"""
 		self.__parent = parent
 		self.__orientation = orientation
@@ -71,7 +71,7 @@ class CustomFilePicker:
 
 		Parameters
 		----------
-		alig: int
+		alig : int
 			Label alignment
 		"""
 		filePickerLabel = wx.StaticText(
