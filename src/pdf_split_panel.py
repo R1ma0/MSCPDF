@@ -1,17 +1,12 @@
 import wx
 import os
 from enum import Enum
-from pypdf import PdfWriter
-from reader import Reader
+from pdf_rw import PdfRW, SplitMode
 from custom_file_picker import CustomFilePicker
 from notebook_panel import NotebookPanel
 from item_swapper import ItemSwapper, IdxSwapType
 
 
-
-class SplitMode(Enum):
-	SINGLE = 0
-	MULTIPLE = 1
 
 class RangeSpinType(Enum):
 	MIN = 0
@@ -29,7 +24,7 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 		NotebookPanel.__init__(self)
 
 		self.__parent = parent
-		self.__reader = Reader()
+		self.__pdfRW = PdfRW()
 		self.__itemSwapper = ItemSwapper()
 		self.__pdfMeta = None
 		self.__pathToSavePdf = None
@@ -40,10 +35,10 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 		self.__createWidgets()
 
 	def OnOpenPdfReadPath(self, event: wx.Event) -> None:
-		self.__reader.path = event.GetPath()
+		self.__pdfRW.path = event.GetPath()
 		
 		try:
-			self.__pdfMeta = self.__reader.getMetadata()
+			self.__pdfMeta = self.__pdfRW.getMetadata()
 		except FileNotFoundError:
 			self.SetStatusBarText("The file specified for load was not found!")
 		else:
@@ -105,11 +100,12 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 			return
 
 		selectedSplitMode = self.__spSaveMode.GetSelection()
-
-		if selectedSplitMode == SplitMode.SINGLE.value:
-			self.__writeSinglePdf()
-		if selectedSplitMode == SplitMode.MULTIPLE.value:
-			self.__writeMultiplePdf()
+		
+		self.__pdfRW.writePagesToPDF(
+			self.__pathToSavePdf, 
+			self.__pdfPageRangeList, 
+			SplitMode(selectedSplitMode)
+		)
 
 		dialogMessage = "File successfully saved"
 		dialogCaption = "PDF Read & Write Information!"
@@ -174,43 +170,6 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 
 		self.__minPageSpinCtrl.SetValue(1)
 		self.__maxPageSpinCtrl.SetValue(2)
-
-	def __addRangesToWriter(self, writer: PdfWriter, pages: list) -> None:
-		pageIdx1 = pages[0] - 1
-		pageIdx2 = pages[1] - 1
-
-		pageRange = [pageIdx1] if pageIdx1 == pageIdx2 else [pageIdx1, pageIdx2]
-
-		writer.append(self.__reader.path, pageRange)
-
-	def __writeSinglePdf(self) -> None:
-		"""
-		Writing selected ranges to a single PDF file
-		"""
-		writer = PdfWriter()
-
-		for pages in self.__pdfPageRangeList:
-			self.__addRangesToWriter(writer, pages)			
-		
-		writer.write(self.__pathToSavePdf)
-		writer.close()
-
-	def __writeMultiplePdf(self) -> None:
-		"""
-		Writing selected ranges to multiple PDF files
-		"""
-		for idx, pages in enumerate(self.__pdfPageRangeList):
-			srcPath = os.path.dirname(self.__pathToSavePdf)
-			srcFileName, srcSuffix = os.path.splitext(self.__pathToSavePdf)
-			saveFileName = srcFileName + f"_{idx + 1}" + srcSuffix
-			pathToSave = os.path.join(srcPath, saveFileName)
-
-			writer = PdfWriter()
-
-			self.__addRangesToWriter(writer, pages)
-
-			writer.write(pathToSave)
-			writer.close()
 
 	def __createWidgets(self) -> None:
 		"""
@@ -372,13 +331,13 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 		return os.path.isdir(dirname)
 
 	def __checkSavingConditions(self) -> None:
-		srcPathNotNone = self.__reader.path is not None
+		srcPathNotNone = self.__pdfRW.path is not None
 		savePathNotNone = self.__pathToSavePdf is not None
 
 		if savePathNotNone:
 			isSaveDirExists = self.__isSaveFileDirExists(self.__pathToSavePdf)
 
-		srcPathValid = srcPathNotNone and os.path.exists(self.__reader.path)
+		srcPathValid = srcPathNotNone and os.path.exists(self.__pdfRW.path)
 		saveDirValid = savePathNotNone and isSaveDirExists
 
 		if srcPathValid and saveDirValid:

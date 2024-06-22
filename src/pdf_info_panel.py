@@ -1,5 +1,5 @@
 import wx
-from reader import Reader
+from pdf_rw import PdfRW
 from pdf_info import PdfInfo
 from pdf_info_item import PdfInfoItem
 from custom_file_picker import CustomFilePicker
@@ -17,7 +17,7 @@ class PdfInfoPanel(wx.Panel, NotebookPanel):
 		NotebookPanel.__init__(self)
 
 		self.__parent = parent
-		self.__reader = Reader()
+		self.__pdfRW = PdfRW()
 		self.__infoItems = self.__initInfoItems()
 		
 		self.__showPdfInfoItems(False)
@@ -25,10 +25,10 @@ class PdfInfoPanel(wx.Panel, NotebookPanel):
 		self.__createWidgets()
 
 	def OnOpenPdf(self, event: wx.Event) -> None:
-		self.__reader.path = event.GetPath()
+		self.__pdfRW.path = event.GetPath()
 
 		try:
-			_ =self.__reader.getMetadata() 
+			_ =self.__pdfRW.getMetadata() 
 		except FileNotFoundError:
 			self.SetStatusBarText("Specified file not found!")
 		else:
@@ -98,7 +98,7 @@ class PdfInfoPanel(wx.Panel, NotebookPanel):
 		def setData(self, key: str, value: str) -> None:
 			self.__infoItems.get(key).text = value if value != None else "Empty"
 
-		meta =self.__reader.getMetadata() 
+		meta = self.__pdfRW.getMetadata() 
 
 		setData(self, "pages", meta.pages)
 		setData(self, "title", meta.title)
