@@ -200,7 +200,8 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 		controlsSizer.Add(self.__totalPages, flag=flags, border=self.__margin)
 
 		self.__createPageRangeCtrls(controlsSizer)
-		self.__createControlButtons(controlsSizer)
+		self.__createPagesControlButtons(controlsSizer)
+		self.__createSavePDFButton(controlsSizer)
 
 		flags = wx.ALIGN_CENTER | wx.BOTTOM | wx.RIGHT
 		rangesSizer.Add(
@@ -300,34 +301,44 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 		flags = wx.BOTTOM | wx.LEFT
 		sizer.Add(stBoxSizer, flag=flags, border=self.__margin)
 
-	def __createControlButtons(self, sizer: wx.BoxSizer) -> None:
-		flags = wx.ALIGN_RIGHT | wx.BOTTOM
-		border = 15
+	def __createPagesControlButtons(self, sizer: wx.BoxSizer) -> None:
+		flags = wx.BOTTOM
 		size = (150, 30)
+
+		topSizer = wx.BoxSizer(wx.HORIZONTAL)
 
 		addRangeLabel = "Add Range"
 		self.__addRangeBtn = wx.Button(self, label=addRangeLabel, size=size)
 		self.__addRangeBtn.Disable()
 		self.Bind(wx.EVT_BUTTON, self.OnAddRange, self.__addRangeBtn)
-		sizer.Add(self.__addRangeBtn, flag=flags, border=self.__margin)
+		topSizer.Add(self.__addRangeBtn, flag=flags, border=self.__margin)
 
 		rmRangeBtnLabel = "Remove Range"
 		self.__rmRangeBtn = wx.Button(self, label=rmRangeBtnLabel, size=size)
 		self.__rmRangeBtn.Disable()
 		self.Bind(wx.EVT_BUTTON, self.OnRemoveRange, self.__rmRangeBtn)
-		sizer.Add(self.__rmRangeBtn, flag=flags, border=self.__margin)
+		flags = flags | wx.LEFT
+		topSizer.Add(self.__rmRangeBtn, flag=flags, border=self.__margin)
+
+		flags = wx.LEFT | wx.ALIGN_CENTRE_HORIZONTAL
+		sizer.Add(topSizer, flag=flags, border=self.__margin)
 
 		clrRangesLabel = "Clear Ranges"
 		self.__clrRangesBtn = wx.Button(self, label=clrRangesLabel, size=size)
 		self.__clrRangesBtn.Disable()
 		self.Bind(wx.EVT_BUTTON, self.OnClearRanges, self.__clrRangesBtn)
+		flags = wx.BOTTOM | wx.ALIGN_CENTRE_HORIZONTAL
 		sizer.Add(self.__clrRangesBtn, flag=flags, border=self.__margin)
+
+	def __createSavePDFButton(self, sizer: wx.BoxSizer) -> None:
+		size = (150, 30)
 
 		saveLabel = "Save PDF"
 		self.__saveBtn = wx.Button(self, label=saveLabel, size=size)
 		self.__saveBtn.Disable()
 		self.Bind(wx.EVT_BUTTON, self.OnSavePdf, self.__saveBtn)
-		sizer.Add(self.__saveBtn, flag=wx.ALIGN_RIGHT)
+		flags = wx.ALIGN_CENTER | wx.TOP
+		sizer.Add(self.__saveBtn, flag=flags, border=self.__margin)
 
 	def __isSaveFileDirExists(self, savePath: str) -> bool:
 		dirname = os.path.dirname(savePath)
