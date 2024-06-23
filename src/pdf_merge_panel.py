@@ -48,6 +48,9 @@ class PdfMergePanel(wx.Panel, NotebookPanel):
 			self.__addPathToListBox(pathList)
 			self.__pdfPathList = pathList
 
+			self.__clearBtn.Enable()
+			self.__rmBtn.Enable()
+
 	def OnRemoveBtn(self, event: wx.Event) -> None:
 		idx = self.__pdfTitlesBox.GetSelection()
 
@@ -59,10 +62,15 @@ class PdfMergePanel(wx.Panel, NotebookPanel):
 			self.__pdfPathList.pop(idx)
 
 		if self.__pdfTitlesBox.GetCount() == 0:
-			pass
+			self.__rmBtn.Disable()
+			self.__clearBtn.Disable()
 
 	def OnClearBtn(self, event: wx.Event) -> None:
 		Utils.clearListBox(self.__pdfTitlesBox)
+		
+		self.__clearBtn.Disable()
+		self.__rmBtn.Disable()
+
 		self.SetStatusBarText("File list cleared")
 
 	def OnMoveUpBtn(self, event: wx.Event) -> None:
@@ -130,10 +138,12 @@ class PdfMergePanel(wx.Panel, NotebookPanel):
 		btnSizer.Add(self.__addBtn, flag=wx.BOTTOM, border=self.__margin)
 
 		self.__rmBtn = wx.Button(self, label="Remove", size=size)
+		self.__rmBtn.Disable()
 		self.Bind(wx.EVT_BUTTON, self.OnRemoveBtn, self.__rmBtn)
 		btnSizer.Add(self.__rmBtn, flag=wx.BOTTOM, border=self.__margin)
 
 		self.__clearBtn = wx.Button(self, label="Clear", size=size)
+		self.__clearBtn.Disable()
 		self.Bind(wx.EVT_BUTTON, self.OnClearBtn, self.__clearBtn)
 		btnSizer.Add(self.__clearBtn, flag=wx.BOTTOM, border=self.__margin)
 
