@@ -5,6 +5,7 @@ from pdf_rw import PdfRW, SplitMode
 from custom_file_picker import CustomFilePicker
 from notebook_panel import NotebookPanel
 from item_swapper import ItemSwapper, IdxSwapType
+from utils import Utils
 
 
 
@@ -235,22 +236,22 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 		"""
 		Creates file pickers for load and save paths
 		"""
-		pdfReadPath = CustomFilePicker(
+		pdfReadPicker = CustomFilePicker(
 			self, 
 			label="Select PDF file to read:", 
 			msg="Select PDF file", 
 			wildcard="PDF files (*.pdf)|*.pdf"
 		)
 		flags = wx.TOP | wx.EXPAND | wx.LEFT | wx.RIGHT
-		sizer.Add(pdfReadPath.getSizer(), flag=flags, border=self.__margin)
+		sizer.Add(pdfReadPicker.getSizer(), flag=flags, border=self.__margin)
 		self.Bind(
 			wx.EVT_FILEPICKER_CHANGED, 
 			self.OnOpenPdfReadPath, 
-			pdfReadPath.getPicker()
+			pdfReadPicker.getPicker()
 		)
 
 		style = wx.FLP_SAVE | wx.FLP_OVERWRITE_PROMPT | wx.FLP_USE_TEXTCTRL
-		pdfWritePath = CustomFilePicker(
+		pdfWritePicker = CustomFilePicker(
 			self,
 			label="Select path to save PDF:",
 			msg="Enter filename to save",
@@ -258,11 +259,11 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 			pickerStyle=style
 		)
 		flags = wx.BOTTOM | wx.EXPAND | wx.LEFT | wx.RIGHT
-		sizer.Add(pdfWritePath.getSizer(), flag=flags, border=self.__margin)
+		sizer.Add(pdfWritePicker.getSizer(), flag=flags, border=self.__margin)
 		self.Bind(
 			wx.EVT_FILEPICKER_CHANGED, 
 			self.OnOpenPdfWritePath, 
-			pdfWritePath.getPicker()
+			pdfWritePicker.getPicker()
 		)
 
 	def __createPageRangeCtrls(self, sizer: wx.BoxSizer) -> None:
@@ -333,7 +334,9 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 	def __createSavePDFButton(self, sizer: wx.BoxSizer) -> None:
 		size = (150, 30)
 
-		saveLabel = "Save PDF"
+		Utils.addSeparator(self, sizer, self.__margin, wx.EXPAND | wx.LEFT)
+
+		saveLabel = "Split"
 		self.__saveBtn = wx.Button(self, label=saveLabel, size=size)
 		self.__saveBtn.Disable()
 		self.Bind(wx.EVT_BUTTON, self.OnSavePdf, self.__saveBtn)

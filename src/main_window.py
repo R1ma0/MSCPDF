@@ -1,6 +1,7 @@
 import wx
 from pdf_info_panel import PdfInfoPanel
 from pdf_split_panel import PdfSplitPanel
+from pdf_merge_panel import PdfMergePanel
 
 
 
@@ -40,7 +41,8 @@ class MainWindow(wx.Frame):
         tabSplit.SetStatusBar(self.__statusBar)
         notebook.AddPage(tabSplit, "Split")
 
-        tabMerge = wx.Panel(notebook)
+        tabMerge = PdfMergePanel(notebook)
+        tabMerge.SetStatusBar(self.__statusBar)
         notebook.AddPage(tabMerge, "Merge")
 
         return notebook
