@@ -189,14 +189,16 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 
 		controlsSizer = wx.BoxSizer(wx.VERTICAL)
 
-		flags = wx.LEFT | wx.BOTTOM
-		self.__totalPages = wx.StaticText(self, label="Total Pages: 0")
-		controlsSizer.Add(self.__totalPages, flag=flags, border=self.__margin)
 
+		flags = wx.EXPAND | wx.LEFT | wx.BOTTOM
 		self.__spSaveMode = wx.RadioBox(
 			self, label="Split Mode", choices=["Single File", "Multiple Files"]
 		)
 		controlsSizer.Add(self.__spSaveMode, flag=flags, border=self.__margin)
+
+		flags = wx.LEFT | wx.BOTTOM
+		self.__totalPages = wx.StaticText(self, label="PDF Total Pages: 0")
+		controlsSizer.Add(self.__totalPages, flag=flags, border=self.__margin)
 
 		self.__createPageRangeCtrls(controlsSizer)
 		self.__createControlButtons(controlsSizer)
@@ -271,31 +273,33 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 		border = 15
 		size = (150, 20)
 
-		pagesRangeSizer = wx.BoxSizer(wx.HORIZONTAL)
+		stBoxSizer = wx.StaticBoxSizer(wx.HORIZONTAL, self, label="Page Ranges")
+		stBox = stBoxSizer.GetStaticBox()
 
-		minPagesLabel = wx.StaticText(self, label="Pages")
-		pagesRangeSizer.Add(minPagesLabel, flag=flags, border=self.__margin)
+		minPagesLabel = wx.StaticText(stBox, label="Pages")
+		stBoxSizer.Add(minPagesLabel, flag=flags, border=self.__margin)
 
 		self.__minPageSpinCtrl = wx.SpinCtrl(
-			self, min=1, max=2, initial=1, size=size, style=wx.SP_WRAP
+			stBox, min=1, max=2, initial=1, size=size, style=wx.SP_WRAP
 		)
 		self.Bind(wx.EVT_SPINCTRL, self.OnMinPageSpin, self.__minPageSpinCtrl)
-		pagesRangeSizer.Add(
+		stBoxSizer.Add(
 			self.__minPageSpinCtrl, flag=wx.LEFT, border=self.__margin
 		)
 
-		maxPagesLabel = wx.StaticText(self, label="to")
-		pagesRangeSizer.Add(maxPagesLabel, flag=flags, border=self.__margin)
+		maxPagesLabel = wx.StaticText(stBox, label="to")
+		stBoxSizer.Add(maxPagesLabel, flag=flags, border=self.__margin)
 
 		self.__maxPageSpinCtrl = wx.SpinCtrl(
-			self, min=2, max=2, initial=2, size=size, style=wx.SP_WRAP
+			stBox, min=2, max=2, initial=2, size=size, style=wx.SP_WRAP
 		)
 		self.Bind(wx.EVT_SPINCTRL, self.OnMaxPageSpin, self.__maxPageSpinCtrl)
-		pagesRangeSizer.Add(
+		stBoxSizer.Add(
 			self.__maxPageSpinCtrl, flag=wx.LEFT, border=self.__margin
 		)
 
-		sizer.Add(pagesRangeSizer, flag=wx.BOTTOM, border=self.__margin)
+		flags = wx.BOTTOM | wx.LEFT
+		sizer.Add(stBoxSizer, flag=flags, border=self.__margin)
 
 	def __createControlButtons(self, sizer: wx.BoxSizer) -> None:
 		flags = wx.ALIGN_RIGHT | wx.BOTTOM
