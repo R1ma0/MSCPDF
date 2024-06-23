@@ -14,7 +14,8 @@ class ItemSwapper:
 	Class that implements algorithms for element swap
 	"""
 
-	def listItemsSwap(self, lst: list, idxOne: int, idxTwo: int) -> list:
+	@staticmethod
+	def listItemsSwap(lst: list, idxOne: int, idxTwo: int) -> list:
 		"""
 		Swaps list items and returns updated list
 
@@ -31,8 +32,9 @@ class ItemSwapper:
 
 		return lst
 
+	@staticmethod
 	def listBoxItemsSwap(
-		self, listBox: wx.ListBox, idxOne: int, idxTwo: int
+		listBox: wx.ListBox, idxOne: int, idxTwo: int
 	) -> wx.ListBox:
 		"""
 		Swaps wx.ListBox items and return updated ListBox
@@ -54,8 +56,9 @@ class ItemSwapper:
 
 		return listBox
 
+	@staticmethod
 	def swapListsItems(
-		self, listBox: wx.ListBox, listIdx: list, idxOne: int, idxTwo: int
+		listBox: wx.ListBox, listIdx: list, idxOne: int, idxTwo: int
 	) -> (wx.ListBox, list):
 		"""
 		Swaps elements in wx.ListBox and list with the same indexes.
@@ -72,13 +75,14 @@ class ItemSwapper:
 		idxTwo : int
 			Index of the second element
 		"""
-		listIdx = self.listItemsSwap(listIdx, idxOne, idxTwo)
-		listBox = self.listBoxItemsSwap(listBox, idxOne, idxTwo)
+		listIdx = ItemSwapper.listItemsSwap(listIdx, idxOne, idxTwo)
+		listBox = ItemSwapper.listBoxItemsSwap(listBox, idxOne, idxTwo)
 
 		return listBox, listIdx
 
+	@staticmethod
 	def listBoxAndListIdxSwap(
-		self, idxType: IdxSwapType, listBox: wx.ListBox, listIdx: list
+		idxType: IdxSwapType, listBox: wx.ListBox, listIdx: list
 	) -> (wx.ListBox, list):
 		"""
 		Perform items swap with boundaries overstepping check.
@@ -108,7 +112,9 @@ class ItemSwapper:
 		else:
 			return 
 
-		listBox, listIdx = self.swapListsItems(listBox, listIdx, idxOne, idxTwo)
+		listBox, listIdx = ItemSwapper.swapListsItems(
+			listBox, listIdx, idxOne, idxTwo
+		)
 		listBox.SetSelection(idxTwo)
 
 		return listBox, listIdx

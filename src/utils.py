@@ -1,4 +1,5 @@
 import wx
+import os
 
 
 
@@ -10,3 +11,14 @@ class Utils:
 	) -> None:
 		separator = wx.StaticLine(parent)
 		sizer.Add(separator, flag=flags, border=border)
+
+	@staticmethod
+	def clearListBox(listBox: wx.ListBox) -> wx.ListBox:
+		for i in range(listBox.GetCount()):
+			idx = listBox.GetTopItem()
+			listBox.Delete(idx)
+
+	@staticmethod
+	def isDirExist(path: str) -> bool:
+		dirname = os.path.dirname(path)
+		return os.path.isdir(dirname)

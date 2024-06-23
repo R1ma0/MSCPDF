@@ -106,6 +106,15 @@ class PdfRW:
 			writer.write(pathToSave)
 			writer.close()
 
+	def mergePDFFiles(self, paths: list) -> None:
+		merger = PdfWriter()
+
+		for path in paths:
+			merger.append(path)
+
+		merger.write(self.__pdfPath)
+		merger.close()
+
 	def __addRangesToWriter(self, writer: PdfWriter, pages: list) -> None:
 		pageIdx1 = pages[0] - 1
 		pageIdx2 = pages[1] - 1

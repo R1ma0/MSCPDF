@@ -26,7 +26,6 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 
 		self.__parent = parent
 		self.__pdfRW = PdfRW()
-		self.__itemSwapper = ItemSwapper()
 		self.__pdfMeta = None
 		self.__pathToSavePdf = None
 		self.__pdfPageRangeList = []
@@ -52,8 +51,10 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 	def OnOpenPdfWritePath(self, event: wx.Event) -> None:
 		self.__pathToSavePdf = event.GetPath()
 
-		if not self.__isSaveFileDirExists(event.GetPath()):
+		if not Utils.isDirExist(event.GetPath()):
 			self.SetStatusBarText("The folder to be saved is incorrect!")
+		else:
+			self.SetStatusBarText("")
 
 		self.__checkSavingConditions()
 
@@ -127,22 +128,19 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 		self.__checkRangeSpinValue(self.__minPageSpinCtrl, RangeSpinType.MAX)
 
 	def OnClearRanges(self, event: wx.Event) -> None:
-		for i in range(self.__rangesList.GetCount()):
-			idx = self.__rangesList.GetTopItem()
-			self.__rangesList.Delete(idx)
-
+		Utils.clearListBox(self.__rangesList)
 		self.__clrRangesBtn.Disable()
 		self.__rmRangeBtn.Disable()
 		self.__checkSavingConditions()
 		self.SetStatusBarText("Range list cleared")
 
 	def OnListItemMoveUp(self, event: wx.Event) -> None:
-		self.__itemSwapper.listBoxAndListIdxSwap(
+		ItemSwapper.listBoxAndListIdxSwap(
 			IdxSwapType.LEFT, self.__rangesList, self.__pdfPageRangeList
 		)
 
 	def OnListItemMoveDown(self, event: wx.Event) -> None:
-		self.__itemSwapper.listBoxAndListIdxSwap(
+		ItemSwapper.listBoxAndListIdxSwap(
 			IdxSwapType.RIGHT, self.__rangesList, self.__pdfPageRangeList
 		)
 
@@ -342,10 +340,6 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 		self.Bind(wx.EVT_BUTTON, self.OnSavePdf, self.__saveBtn)
 		flags = wx.ALIGN_CENTER | wx.TOP
 		sizer.Add(self.__saveBtn, flag=flags, border=self.__margin)
-
-	def __isSaveFileDirExists(self, savePath: str) -> bool:
-		dirname = os.path.dirname(savePath)
-		return os.path.isdir(dirname)
 
 	def __checkSavingConditions(self) -> None:
 		srcPathNotNone = self.__pdfRW.path is not None
