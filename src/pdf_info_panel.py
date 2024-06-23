@@ -51,13 +51,12 @@ class PdfInfoPanel(wx.Panel, NotebookPanel):
 	def __createFilePicker(self) -> None:
 		pdfFP = CustomFilePicker(
 			self, 
-			size=(775, 30), 
+			size=(745, 30), 
 			label="Select PDF file", 
 			msg="Select PDF file", 
 			wildcard="PDF files (*.pdf)|*.pdf"
 		)
-		sizerFlags = wx.TOP | wx.BOTTOM | wx.LEFT | wx.RIGHT
-		self.__mainSizer.Add(pdfFP.getSizer(), flag=sizerFlags, border=15)
+		self.__mainSizer.Add(pdfFP.getSizer(), flag=wx.ALL, border=15)
 		self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnOpenPdf, pdfFP.getPicker())
 
 	def __initInfoItems(self) -> dict:
@@ -81,7 +80,7 @@ class PdfInfoPanel(wx.Panel, NotebookPanel):
 			itemData = self.__infoItems.get(item)
 			itemSizer = self.__createInfoSizer(itemData)
 
-			self.__mainSizer.Add(itemSizer)
+			self.__mainSizer.Add(itemSizer, flag=wx.LEFT | wx.RIGHT, border=15)
 
 	def __createInfoSizer(self, item: PdfInfoItem) -> wx.BoxSizer:
 		sizer = wx.BoxSizer(wx.HORIZONTAL)

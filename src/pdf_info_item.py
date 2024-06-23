@@ -30,7 +30,7 @@ class PdfInfoItem:
 		self.__fontBold = wx.Font(12, wx.DEFAULT, wx.BOLD, wx.NORMAL)
 		self.__fontNormal = wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.NORMAL)
 
-		self.__staticTextWrapWidth = WINDOW_WIDTH - 125
+		self.__staticTextWrapWidth = WINDOW_WIDTH - 145
 
 		self.__labelST = None
 		self.__textST = None
