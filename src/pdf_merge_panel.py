@@ -45,8 +45,8 @@ class PdfMergePanel(wx.Panel, NotebookPanel):
 			pathList = fileDialog.GetPaths()
 			
 			Utils.clearListBox(self.__pdfTitlesBox)
-			self.__addPathToListBox(pathList)
-			self.__pdfPathList = pathList
+			self.__pdfPathList = self.__pdfPathList + pathList
+			self.__addPathToListBox(self.__pdfPathList)
 
 			self.__clearBtn.Enable()
 			self.__rmBtn.Enable()
@@ -67,6 +67,7 @@ class PdfMergePanel(wx.Panel, NotebookPanel):
 
 	def OnClearBtn(self, event: wx.Event) -> None:
 		Utils.clearListBox(self.__pdfTitlesBox)
+		self.__pdfPathList = []
 		
 		self.__clearBtn.Disable()
 		self.__rmBtn.Disable()
