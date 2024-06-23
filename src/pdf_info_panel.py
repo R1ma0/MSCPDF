@@ -56,7 +56,7 @@ class PdfInfoPanel(wx.Panel, NotebookPanel):
 			msg="Select PDF file", 
 			wildcard="PDF files (*.pdf)|*.pdf"
 		)
-		sizerFlags = wx.TOP | wx.BOTTOM
+		sizerFlags = wx.TOP | wx.BOTTOM | wx.LEFT | wx.RIGHT
 		self.__mainSizer.Add(pdfFP.getSizer(), flag=sizerFlags, border=15)
 		self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnOpenPdf, pdfFP.getPicker())
 

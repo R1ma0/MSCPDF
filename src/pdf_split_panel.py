@@ -182,13 +182,12 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 		self.__createRngListAndBtns(rngListAndBtnsSizer)
 
 		rangesSizer = wx.BoxSizer(wx.HORIZONTAL)
-		flags = wx.EXPAND | wx.BOTTOM
+		flags = wx.EXPAND | wx.BOTTOM | wx.LEFT
 		rangesSizer.Add(
 			rngListAndBtnsSizer, flag=flags, border=self.__margin, proportion=1
 		)
 
 		controlsSizer = wx.BoxSizer(wx.VERTICAL)
-
 
 		flags = wx.EXPAND | wx.LEFT | wx.BOTTOM
 		self.__spSaveMode = wx.RadioBox(
@@ -203,7 +202,7 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 		self.__createPageRangeCtrls(controlsSizer)
 		self.__createControlButtons(controlsSizer)
 
-		flags = wx.ALIGN_BOTTOM | wx.BOTTOM
+		flags = wx.ALIGN_CENTER | wx.BOTTOM | wx.RIGHT
 		rangesSizer.Add(
 			controlsSizer, flag=flags, border=self.__margin, proportion=1
 		)
@@ -241,7 +240,7 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 			msg="Select PDF file", 
 			wildcard="PDF files (*.pdf)|*.pdf"
 		)
-		flags = wx.TOP | wx.EXPAND
+		flags = wx.TOP | wx.EXPAND | wx.LEFT | wx.RIGHT
 		sizer.Add(pdfReadPath.getSizer(), flag=flags, border=self.__margin)
 		self.Bind(
 			wx.EVT_FILEPICKER_CHANGED, 
@@ -257,7 +256,7 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 			wildcard="PDF files (*.pdf)|*.pdf",
 			pickerStyle=style
 		)
-		flags = wx.BOTTOM | wx.EXPAND
+		flags = wx.BOTTOM | wx.EXPAND | wx.LEFT | wx.RIGHT
 		sizer.Add(pdfWritePath.getSizer(), flag=flags, border=self.__margin)
 		self.Bind(
 			wx.EVT_FILEPICKER_CHANGED, 
