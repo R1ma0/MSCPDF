@@ -22,3 +22,24 @@ class Utils:
 	def isDirExist(path: str) -> bool:
 		dirname = os.path.dirname(path)
 		return os.path.isdir(dirname)
+
+	@staticmethod
+	def showSucsessfulSaveDialog(parent: wx.Window) -> None:
+		dialogMessage = "File successfully saved!"
+		dialogCaption = "PDF Read & Write Information!"
+		dialogStyle = wx.OK_DEFAULT | wx.ICON_INFORMATION
+
+		msgDialog = wx.MessageDialog(
+			parent, 
+			message=dialogMessage, 
+			caption=dialogCaption,
+			style=dialogStyle
+		)
+		msgDialog.ShowModal()
+
+	@staticmethod
+	def isListBoxItemSelect(listBox: wx.ListBox) -> bool:
+		if listBox.GetSelection() == -1:
+			return False
+
+		return True

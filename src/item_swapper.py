@@ -99,6 +99,9 @@ class ItemSwapper:
 		"""
 		idxOne = listBox.GetSelection()
 
+		if idxOne == -1:
+			raise IndexError
+
 		if idxType == IdxSwapType.LEFT:
 			idxTwo = idxOne - 1
 
@@ -110,7 +113,7 @@ class ItemSwapper:
 			if idxTwo > listBox.GetCount() - 1:
 				return
 		else:
-			return 
+			raise IndexError
 
 		listBox, listIdx = ItemSwapper.swapListsItems(
 			listBox, listIdx, idxOne, idxTwo

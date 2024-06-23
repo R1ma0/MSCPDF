@@ -74,8 +74,7 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 		lastItemIdx = self.__rangesList.GetCount()
 		self.__rangesList.InsertItems([rangeText], lastItemIdx)
 
-		self.__rmRangeBtn.Enable()
-		self.__clrRangesBtn.Enable()
+		self.__enableControlBtns()
 		self.__checkSavingConditions()
 
 	def OnRemoveRange(self, event: wx.Event) -> None:
@@ -91,8 +90,7 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 			self.SetStatusBarText(f"Removed range pages {minVal} to {maxVal}")
 
 		if self.__rangesList.GetCount() == 0:
-			self.__rmRangeBtn.Disable()
-			self.__clrRangesBtn.Disable()
+			self.__enableControlBtns(False)
 
 		self.__checkSavingConditions()
 
@@ -109,17 +107,7 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 			SplitMode(selectedSplitMode)
 		)
 
-		dialogMessage = "File successfully saved"
-		dialogCaption = "PDF Read & Write Information!"
-		dialogStyle = wx.OK_DEFAULT | wx.ICON_INFORMATION
-
-		msgDialog = wx.MessageDialog(
-			self, 
-			message=dialogMessage, 
-			caption=dialogCaption,
-			style=dialogStyle
-		)
-		msgDialog.ShowModal()
+		Utils.showSucsessfulSaveDialog(self)
 
 	def OnMinPageSpin(self, event: wx.Event) -> None:
 		self.__checkRangeSpinValue(self.__maxPageSpinCtrl, RangeSpinType.MIN)
@@ -129,17 +117,22 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 
 	def OnClearRanges(self, event: wx.Event) -> None:
 		Utils.clearListBox(self.__rangesList)
-		self.__clrRangesBtn.Disable()
-		self.__rmRangeBtn.Disable()
 		self.__checkSavingConditions()
+		self.__enableControlBtns(False)
 		self.SetStatusBarText("Range list cleared")
 
 	def OnListItemMoveUp(self, event: wx.Event) -> None:
+		if not Utils.isListBoxItemSelect(self.__rangesList):
+			return
+
 		ItemSwapper.listBoxAndListIdxSwap(
 			IdxSwapType.LEFT, self.__rangesList, self.__pdfPageRangeList
 		)
 
 	def OnListItemMoveDown(self, event: wx.Event) -> None:
+		if not Utils.isListBoxItemSelect(self.__rangesList):
+			return
+			
 		ItemSwapper.listBoxAndListIdxSwap(
 			IdxSwapType.RIGHT, self.__rangesList, self.__pdfPageRangeList
 		)
@@ -201,6 +194,7 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 		self.__createPageRangeCtrls(controlsSizer)
 		self.__createPagesControlButtons(controlsSizer)
 		self.__createSavePDFButton(controlsSizer)
+		self.__enableControlBtns(False)
 
 		flags = wx.ALIGN_CENTER | wx.BOTTOM | wx.RIGHT
 		rangesSizer.Add(
@@ -211,6 +205,8 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 		self.SetSizerAndFit(self.__mainSizer)
 
 	def __createRngListAndBtns(self, sizer: wx.BoxSizer) -> None:
+		size = (150, 30)
+
 		flags = wx.EXPAND | wx.BOTTOM
 		sizer.Add(
 			self.__rangesList, flag=flags, border=self.__margin, proportion=1
@@ -218,15 +214,15 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 
 		rngControlBtnsSizer = wx.BoxSizer(wx.HORIZONTAL)
 
-		rngMoveUpBtn = wx.Button(self, label="Move Up", size=(150, 30))
-		self.Bind(wx.EVT_BUTTON, self.OnListItemMoveUp, rngMoveUpBtn)
+		self.__rngMoveUpBtn = wx.Button(self, label="Move Up", size=size)
+		self.Bind(wx.EVT_BUTTON, self.OnListItemMoveUp, self.__rngMoveUpBtn)
 		rngControlBtnsSizer.Add(
-			rngMoveUpBtn, flag=wx.RIGHT, border=self.__margin
+			self.__rngMoveUpBtn, flag=wx.RIGHT, border=self.__margin
 		)
 
-		rngMoveDownBtn = wx.Button(self, label="Move Down", size=(150, 30))
-		self.Bind(wx.EVT_BUTTON, self.OnListItemMoveDown, rngMoveDownBtn)
-		rngControlBtnsSizer.Add(rngMoveDownBtn)
+		self.__rngMoveDownBtn = wx.Button(self, label="Move Down", size=size)
+		self.Bind(wx.EVT_BUTTON, self.OnListItemMoveDown, self.__rngMoveDownBtn)
+		rngControlBtnsSizer.Add(self.__rngMoveDownBtn)
 
 		sizer.Add(rngControlBtnsSizer, flag=wx.ALIGN_CENTRE_HORIZONTAL)
 
@@ -308,13 +304,11 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 
 		addRangeLabel = "Add Range"
 		self.__addRangeBtn = wx.Button(self, label=addRangeLabel, size=size)
-		self.__addRangeBtn.Disable()
 		self.Bind(wx.EVT_BUTTON, self.OnAddRange, self.__addRangeBtn)
 		topSizer.Add(self.__addRangeBtn, flag=flags, border=self.__margin)
 
 		rmRangeBtnLabel = "Remove Range"
 		self.__rmRangeBtn = wx.Button(self, label=rmRangeBtnLabel, size=size)
-		self.__rmRangeBtn.Disable()
 		self.Bind(wx.EVT_BUTTON, self.OnRemoveRange, self.__rmRangeBtn)
 		flags = flags | wx.LEFT
 		topSizer.Add(self.__rmRangeBtn, flag=flags, border=self.__margin)
@@ -324,7 +318,6 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 
 		clrRangesLabel = "Clear Ranges"
 		self.__clrRangesBtn = wx.Button(self, label=clrRangesLabel, size=size)
-		self.__clrRangesBtn.Disable()
 		self.Bind(wx.EVT_BUTTON, self.OnClearRanges, self.__clrRangesBtn)
 		flags = wx.BOTTOM | wx.ALIGN_CENTRE_HORIZONTAL
 		sizer.Add(self.__clrRangesBtn, flag=flags, border=self.__margin)
@@ -336,7 +329,6 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 
 		saveLabel = "Split"
 		self.__saveBtn = wx.Button(self, label=saveLabel, size=size)
-		self.__saveBtn.Disable()
 		self.Bind(wx.EVT_BUTTON, self.OnSavePdf, self.__saveBtn)
 		flags = wx.ALIGN_CENTER | wx.TOP
 		sizer.Add(self.__saveBtn, flag=flags, border=self.__margin)
@@ -344,16 +336,21 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 	def __checkSavingConditions(self) -> None:
 		srcPathNotNone = self.__pdfRW.path is not None
 		savePathNotNone = self.__pathToSavePdf is not None
+		isRangesNotEmpty = self.__pdfPageRangeList != []
 
 		if savePathNotNone:
-			isSaveDirExists = self.__isSaveFileDirExists(self.__pathToSavePdf)
+			isSaveDirExists = Utils.isDirExist(self.__pathToSavePdf)
 
 		srcPathValid = srcPathNotNone and os.path.exists(self.__pdfRW.path)
 		saveDirValid = savePathNotNone and isSaveDirExists
 
-		if srcPathValid and saveDirValid:
-			self.__saveBtn.Enable()
-			self.__addRangeBtn.Enable()
-		else:
-			self.__saveBtn.Disable()
-			self.__addRangeBtn.Disable()
+		isSaveCondition = srcPathValid and saveDirValid and isRangesNotEmpty
+		isBtnEnable = True if isSaveCondition else False
+		self.__saveBtn.Enable(isBtnEnable)
+
+	def __enableControlBtns(self, state: bool = True) -> None:
+		self.__saveBtn.Enable(state)
+		self.__clrRangesBtn.Enable(state)
+		self.__rmRangeBtn.Enable(state)
+		self.__rngMoveUpBtn.Enable(state)
+		self.__rngMoveDownBtn.Enable(state)
