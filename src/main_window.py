@@ -2,6 +2,7 @@ import wx
 from pdf_info_panel import PdfInfoPanel
 from pdf_split_panel import PdfSplitPanel
 from pdf_merge_panel import PdfMergePanel
+from app_icons import *
 
 
 
@@ -31,19 +32,24 @@ class MainWindow(wx.Frame):
         mainPanel.SetSizer(mainSizer)
 
     def __createNotebook(self, parent: wx.Window) -> wx.Notebook:
+        appIcons = getAppImagesList(24, 24)
         notebook = wx.Notebook(parent)
+        notebook.AssignImageList(appIcons)
 
         tabMetadata = PdfInfoPanel(notebook)
         tabMetadata.SetStatusBar(self.__statusBar)
         notebook.AddPage(tabMetadata, "Metadata")
+        notebook.SetPageImage(0, 6)
 
         tabSplit = PdfSplitPanel(notebook)
         tabSplit.SetStatusBar(self.__statusBar)
         notebook.AddPage(tabSplit, "Split")
+        notebook.SetPageImage(1, 7)
 
         tabMerge = PdfMergePanel(notebook)
         tabMerge.SetStatusBar(self.__statusBar)
         notebook.AddPage(tabMerge, "Merge")
+        notebook.SetPageImage(2, 8)
 
         return notebook
 

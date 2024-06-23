@@ -5,11 +5,13 @@ from notebook_panel import NotebookPanel
 from custom_file_picker import CustomFilePicker
 from item_swapper import ItemSwapper, IdxSwapType
 from utils import Utils
+from app_icons import *
 
 
 
 class PdfMergePanel(wx.Panel, NotebookPanel):
 	"""
+	Panel containing actions for merge PDFs
 	"""
 
 	def __init__(self, parent: wx.Window):
@@ -113,6 +115,8 @@ class PdfMergePanel(wx.Panel, NotebookPanel):
 			contentSizer, flag=flags, border=self.__margin, proportion=1
 		)
 
+		self.__addPanelIcons()
+
 		self.SetSizerAndFit(self.__mainSizer)
 
 	def __createSavePathPicker(self, sizer: wx.BoxSizer) -> None:
@@ -189,3 +193,18 @@ class PdfMergePanel(wx.Panel, NotebookPanel):
 		self.__moveUpBtn.Enable(state)
 		self.__moveDownBtn.Enable(state)
 		self.__saveBtn.Enable(state)
+
+	def __addPanelIcons(self) -> None:
+		iconsBtmp = getAppImagesList(24, 24)
+
+		buttonsAndIcons = [
+			[self.__addBtn, iconsBtmp.GetBitmap(0)],
+			[self.__rmBtn, iconsBtmp.GetBitmap(1)],
+			[self.__clearBtn, iconsBtmp.GetBitmap(2)],
+			[self.__saveBtn, iconsBtmp.GetBitmap(3)],
+			[self.__moveUpBtn, iconsBtmp.GetBitmap(4)],
+			[self.__moveDownBtn, iconsBtmp.GetBitmap(5)]
+		]
+
+		for items in buttonsAndIcons:
+			items[0].SetBitmap(items[1])

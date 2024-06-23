@@ -1,5 +1,6 @@
 import wx
 import os
+from app_icons import *
 from enum import Enum
 from pdf_rw import PdfRW, SplitMode
 from custom_file_picker import CustomFilePicker
@@ -132,7 +133,7 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 	def OnListItemMoveDown(self, event: wx.Event) -> None:
 		if not Utils.isListBoxItemSelect(self.__rangesList):
 			return
-			
+
 		ItemSwapper.listBoxAndListIdxSwap(
 			IdxSwapType.RIGHT, self.__rangesList, self.__pdfPageRangeList
 		)
@@ -201,6 +202,8 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 			controlsSizer, flag=flags, border=self.__margin, proportion=1
 		)
 		self.__mainSizer.Add(rangesSizer, flag=wx.EXPAND, proportion=1)
+
+		self.__addPanelIcons()
 
 		self.SetSizerAndFit(self.__mainSizer)
 
@@ -354,3 +357,18 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 		self.__rmRangeBtn.Enable(state)
 		self.__rngMoveUpBtn.Enable(state)
 		self.__rngMoveDownBtn.Enable(state)
+
+	def __addPanelIcons(self) -> None:
+		iconsBtmp = getAppImagesList(24, 24)
+
+		buttonsAndIcons = [
+			[self.__addRangeBtn, iconsBtmp.GetBitmap(0)],
+			[self.__rmRangeBtn, iconsBtmp.GetBitmap(1)],
+			[self.__clrRangesBtn, iconsBtmp.GetBitmap(2)],
+			[self.__saveBtn, iconsBtmp.GetBitmap(3)],
+			[self.__rngMoveUpBtn, iconsBtmp.GetBitmap(4)],
+			[self.__rngMoveDownBtn, iconsBtmp.GetBitmap(5)]
+		]
+
+		for items in buttonsAndIcons:
+			items[0].SetBitmap(items[1])
