@@ -42,7 +42,9 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 			self.__pdfMeta = self.__pdfRW.getMetadata()
 		except FileNotFoundError:
 			self.SetStatusBarText("The file specified for load was not found!")
+			self.__saveBtn.Enable(False)
 		else:
+			self.SetStatusBarText("")
 			pages = int(self.__pdfMeta.pages)
 			self.__totalPages.SetLabel(f"Total Pages: {pages}")
 
@@ -118,6 +120,7 @@ class PdfSplitPanel(wx.Panel, NotebookPanel):
 
 	def OnClearRanges(self, event: wx.Event) -> None:
 		Utils.clearListBox(self.__rangesList)
+		self.__pdfPageRangeList = []
 		self.__checkSavingConditions()
 		self.__enableControlBtns(False)
 		self.SetStatusBarText("Range list cleared")
