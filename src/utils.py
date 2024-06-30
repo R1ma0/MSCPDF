@@ -1,5 +1,6 @@
 import wx
 import os
+import sys
 
 
 
@@ -43,3 +44,12 @@ class Utils:
 			return False
 
 		return True
+
+	@staticmethod
+	def getResourcePath(relativePath: str) -> str:
+		try:
+			basePath = sys._MEIPAS
+		except Exception:
+			basePath = os.path.abspath(".")
+
+		return os.path.join(basePath, relativePath)
