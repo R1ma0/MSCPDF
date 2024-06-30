@@ -9,11 +9,11 @@ Program for working with PDF files based on wxPython and PyPDF libraries
 
 ## Screenshots
 
-<img src="screenshots/metadata.png" width="500" alt="MetadataImage">
+<img src="screenshots/metadata.PNG" width="500" alt="MetadataImage">
 
-<img src="screenshots/split.png" width="500" alt="SplitImage">
+<img src="screenshots/split.PNG" width="500" alt="SplitImage">
 
-<img src="screenshots/merge.png" width="500" alt="MergeImage">
+<img src="screenshots/merge.PNG" width="500" alt="MergeImage">
 
 ## Tools
 
